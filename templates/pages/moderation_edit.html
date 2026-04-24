@@ -1,0 +1,88 @@
+{% extends "generic/base.html" %}
+{% block title %}Edit Title | WiiLink WFC{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto my-8 px-4">
+    <p class="mb-6 text-lg text-gray-600">>> <a href="/moderation/titles"
+            class="text-gray-700 hover:underline">moderation</a> / {{ title.title_en }}</p>
+    <div class="flex flex-col md:flex-row gap-10 items-center">
+        {% set cover = namespace(url='', fallback='') %}
+        {% set cover_game = title %}
+        {% include "components/game_cover_vars.html" %}
+        <img src="{{ cover.url }}" alt="{{ title.title_en }} Cover" data-fallback="{{ cover.fallback }}"
+            onerror="if (!this.dataset.tried && this.dataset.fallback) { this.dataset.tried = '1'; this.src = this.dataset.fallback; } else { var placeholder = document.createElement('div'); placeholder.className = 'w-24 h-32 bg-gray-700 rounded-lg flex-shrink-0'; this.parentNode.replaceChild(placeholder, this); }"
+            class="w-[170px] object-cover rounded-lg flex-shrink-0">
+        <div class="flex-1 flex flex-col gap-2">
+            <h1 class="text-5xl font-bold text-white mt-3 mb-2">{{ title.title_en }}</h1>
+            <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg">
+                <span>{{ title.game_id }}</span> •
+                {% if title.gamespy_id %}<span>{{ title.gamespy_id }}</span> • {% endif %}
+                {% if title.release_year %}<span>{{ title.release_year }}</span>{% endif %}
+            </div>
+            {% if title.input_controls %}
+            <div class="flex flex-row flex-wrap gap-2 mt-3 mb-2">
+                {% for ctrl in title.input_controls %}
+                <span class="flex items-center gap-1 px-2 py-1">
+                    <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
+                        style="filter:brightness(100000%);" />
+                    {% if ctrl.required %}<span
+                        class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{%
+                    endif %}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <form method="POST" class="mt-10 bg-gray-900/80 rounded-xl p-6 border border-gray-800">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-gray-300 mb-1">GameSpy ID</label>
+                <input type="text" name="gamespy_id" value="{{ title.gamespy_id }}"
+                    class="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white" />
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-1">Compatibility Status</label>
+                <select name="is_supported"
+                    class="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-white">
+                    <option value="0" {% if title.is_supported==0 %}selected{% endif %}>0 - Not Supported</option>
+                    <option value="1" {% if title.is_supported==1 %}selected{% endif %}>1 - Partial Support</option>
+                    <option value="2" {% if title.is_supported==2 %}selected{% endif %}>2 - Fully Supported</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-gray-300 mb-1">Featured</label>
+                <input type="checkbox" name="is_featured" value="1" {% if title.is_featured %}checked{% endif %} />
+            </div>
+        </div>
+        <div class="mt-8">
+            <label class="block text-gray-300 mb-2 text-lg">WFC Observation</label>
+            <div id="observation-single"
+                class="flex flex-col md:flex-row gap-2 items-start md:items-end bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <input type="text" name="obs_title"
+                    value="{{ title.wfc_observations[0].title if title.wfc_observations and title.wfc_observations[0] }}"
+                    placeholder="Title"
+                    class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white flex-1" />
+                <input type="text" name="obs_description"
+                    value="{{ title.wfc_observations[0].description if title.wfc_observations and title.wfc_observations[0] }}"
+                    placeholder="Description"
+                    class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white flex-1" />
+                <input type="text" name="obs_icon"
+                    value="{{ title.wfc_observations[0].icon if title.wfc_observations and title.wfc_observations[0] }}"
+                    placeholder="Icon (e.g. check-circle)"
+                    class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white w-40" />
+                {% if title.wfc_observations and title.wfc_observations[0] %}
+                <button type="submit" name="remove_obs" value="1"
+                    class="ml-2 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">Remove</button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="mt-8 flex items-center gap-4">
+            <button type="submit"
+                class="rounded-lg bg-green-600 hover:bg-green-700 px-6 py-3 text-white font-medium transition">Save
+                Changes</button>
+            <a href="{{ url_for('moderation.titles_panel') }}" class="text-indigo-400 hover:underline">Back to
+                Moderation Search</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

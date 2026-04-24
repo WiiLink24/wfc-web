@@ -34,9 +34,10 @@ def search_titles(query_text="", limit=100):
             WHERE
                 title_en ILIKE %s
                 OR gamespy_id ILIKE %s
+                OR CAST(game_id AS TEXT) ILIKE %s
         """
         like = f"%{clean_query}%"
-        params.extend([like, like])
+        params.extend([like, like, like])
 
     query += """
         ORDER BY title_en ASC
@@ -191,4 +192,74 @@ def titles_panel():
         user_info=user_info,
         query_text=query_text,
         titles=titles,
+    )
+
+
+@moderation_bp.route("/<game_id>", methods=["GET", "POST"])
+def moderation_edit(game_id):
+    """Edit a title by Game ID (string or int)."""
+    if not getattr(g, "oidc_user", None) or not g.oidc_user.logged_in:
+        flash("Please log in to access the moderation panel.")
+        return redirect(url_for("auth_routes.login"))
+
+    conn = psycopg2.connect(config.db_url)
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM titles WHERE game_id = %s", [game_id])
+        row = cur.fetchone()
+        if not row:
+            flash("Title not found.")
+            return redirect(url_for("moderation.titles_panel"))
+        columns = [desc[0] for desc in cur.description]
+        title = dict(zip(columns, row))
+        title["wfc_observations"] = _normalize_observations(title.get("wfc_observations"))
+    finally:
+        cur.close()
+        conn.close()
+
+    if request.method == "POST":
+        new_gamespy_id = request.form.get("gamespy_id", "").strip()
+        is_supported = int(request.form.get("is_supported", title.get("is_supported", 0)))
+        is_featured = bool(request.form.get("is_featured"))
+
+        if "remove_obs" in request.form:
+            observations = []
+        else:
+            obs_title = request.form.get("obs_title", "").strip()
+            obs_description = request.form.get("obs_description", "").strip()
+            obs_icon = request.form.get("obs_icon", "info").strip() or "info"
+            if obs_title and obs_description:
+                observations = [{"title": obs_title, "description": obs_description, "icon": obs_icon}]
+            else:
+                observations = []
+
+        conn = psycopg2.connect(config.db_url)
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                """
+                UPDATE titles
+                SET gamespy_id = %s,
+                    is_supported = %s,
+                    is_featured = %s,
+                    wfc_observations = %s
+                WHERE game_id = %s
+                """,
+                [new_gamespy_id, is_supported, is_featured, Json(observations), game_id],
+            )
+            conn.commit()
+            flash("Game updated successfully.")
+        except Exception as e:
+            conn.rollback()
+            flash(f"Error updating game: {e}")
+        finally:
+            cur.close()
+            conn.close()
+        return redirect(url_for("moderation.moderation_edit", game_id=game_id))
+
+    user_info = get_logged_in_user_info()
+    return render_template(
+        "pages/moderation_edit.html",
+        user_info=user_info,
+        title=title,
     )

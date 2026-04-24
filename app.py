@@ -5,7 +5,6 @@ from flask_session import Session
 
 import config
 from routes.public import public_routes_bp
-from routes.trending import trending_bp
 from routes.auth import auth_routes_bp, set_oidc, get_logged_in_user_info
 from routes.misc import misc_routes_bp
 from routes.pages import pages_bp
@@ -46,7 +45,6 @@ def inject_user_info():
 
 # Register blueprints
 app.register_blueprint(public_routes_bp)
-app.register_blueprint(trending_bp)
 app.register_blueprint(auth_routes_bp)
 app.register_blueprint(misc_routes_bp)
 app.register_blueprint(pages_bp)

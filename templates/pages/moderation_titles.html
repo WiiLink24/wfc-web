@@ -19,100 +19,16 @@
     </form>
 
     {% if query_text %}
-    <div class="overflow-x-auto rounded-2xl border border-gray-800 bg-gray-900/40">
-        <table class="min-w-full text-sm">
-            <thead class="bg-gray-900/80 text-gray-300">
-                <tr>
-                    <th class="text-left px-4 py-3">Game</th>
-                    <th class="text-left px-4 py-3">GameSpy ID</th>
-                    <th class="text-left px-4 py-3">Support</th>
-                    <th class="text-left px-4 py-3">Featured</th>
-                    <th class="text-left px-4 py-3">New Observation</th>
-                    <th class="text-left px-4 py-3">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for title in titles %}
-                <tr class="border-t border-gray-800 align-top">
-                    <td class="px-4 py-4">
-                        {% set cover = namespace(url='', fallback='') %}
-                        {% set cover_game = title %}
-                        {% include "components/game_cover_vars.html" %}
-                        <div class="flex flex-col items-start gap-2">
-                            <img src="{{ cover.url }}" alt="{{ title.title_en }} Cover" data-fallback="{{ cover.fallback }}"
-                                onerror="if (!this.dataset.tried && this.dataset.fallback) { this.dataset.tried = '1'; this.src = this.dataset.fallback; } else { var placeholder = document.createElement('div'); placeholder.className = 'w-16 h-20 bg-gray-700 rounded-lg'; this.parentNode.replaceChild(placeholder, this); }"
-                                class="h-24 object-cover rounded-lg" />
-                            <div class="text-white font-medium">{{ title.title_en }}</div>
-                        </div>
-                        {% if title.release_year %}
-                        <div class="text-xs text-gray-500 mt-1">{{ title.release_year }}</div>
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-4">
-                        <input type="text" name="new_gamespy_id" form="update-title-{{ loop.index }}"
-                            value="{{ title.gamespy_id }}"
-                            class="w-full min-w-[170px] rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-gray-200" />
-                    </td>
-                    <td class="px-4 py-4">
-                        <select name="is_supported" form="update-title-{{ loop.index }}"
-                            class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white">
-                            <option value="0" {% if title.is_supported==0 %}selected{% endif %}>0 - Not Supported
-                            </option>
-                            <option value="1" {% if title.is_supported==1 %}selected{% endif %}>1 - Partial Support
-                            </option>
-                            <option value="2" {% if title.is_supported==2 %}selected{% endif %}>2 - Fully Supported
-                            </option>
-                        </select>
-                    </td>
-                    <td class="px-4 py-4">
-                        <label class="inline-flex items-center gap-2 text-gray-300">
-                            <input type="checkbox" name="is_featured" form="update-title-{{ loop.index }}" {% if
-                                title.is_featured %}checked{% endif %}
-                                class="h-4 w-4 rounded border-gray-700 bg-gray-900 text-indigo-600 focus:ring-indigo-500" />
-                            <span class="text-sm">Featured</span>
-                        </label>
-                    </td>
-                    <td class="px-4 py-4 min-w-[340px]">
-                        <div class="grid grid-cols-1 gap-2">
-                            <input type="text" name="obs_title" form="update-title-{{ loop.index }}"
-                                placeholder="Observation title"
-                                class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white placeholder:text-gray-500" />
-                            <input type="text" name="obs_description" form="update-title-{{ loop.index }}"
-                                placeholder="Observation description"
-                                class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white placeholder:text-gray-500" />
-                            <input type="text" name="obs_icon" form="update-title-{{ loop.index }}" value="info"
-                                placeholder="Icon name (e.g. check-circle)"
-                                class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white placeholder:text-gray-500" />
-                        </div>
-                        {% if title.wfc_observations %}
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            {% for obs in title.wfc_observations %}
-                            <span
-                                class="text-xs bg-gray-800 border border-gray-700 rounded-full px-2 py-1 text-gray-200">
-                                {{ obs.title }}
-                            </span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-4">
-                        <form id="update-title-{{ loop.index }}" method="POST"
-                            action="{{ url_for('moderation.titles_panel') }}">
-                            <input type="hidden" name="q" value="{{ query_text }}" />
-                            <input type="hidden" name="game_id" value="{{ title.game_id }}" />
-                            <input type="hidden" name="gamespy_id" value="{{ title.gamespy_id }}" />
-                        </form>
-                        <button type="submit" form="update-title-{{ loop.index }}"
-                            class="rounded-lg bg-green-600 hover:bg-green-700 px-4 py-2 text-white font-medium transition">Save</button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="px-4 py-10 text-center text-gray-500">No titles found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for rec in titles %}
+        <div onclick="window.location.href='/moderation/{{ rec.game_id }}'" class="relative hover:border-gray-500 cursor-pointer rounded-2xl border border-gray-700  transition">
+            <span class="pointer-events-none">
+            {% include "components/generic_game_card.html" %}
+            </span>
+        </div>
+        {% else %}
+        <div class="px-4 py-10 text-center text-gray-500">No titles found.</div>
+        {% endfor %}
     </div>
     {% else %}
     <div class="rounded-2xl border border-gray-800 bg-gray-900/40 px-6 py-10 text-center text-gray-400">

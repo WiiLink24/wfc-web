@@ -12,7 +12,7 @@
 <div class="h-full max-w-2xl mx-auto my-8 px-4 z-10 relative">
     {% set no_results = not query or (query and not results) %}
     <div class="{{ 'min-h-[60vh] h-full flex flex-col justify-center items-center' if no_results else '' }}">
-        <span class="w-full flex flex-col items-start">
+        <span class="w-full flex flex-col items-start" style="view-transition-name: search-title;">
             <h1 class="text-3xl font-bold text-white">WFC Search</h1>
             <p class="text-gray-400 mt-2 mb-6">Search all our WFC compatible games and software!</p>
         </span>

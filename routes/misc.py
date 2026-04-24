@@ -1,11 +1,7 @@
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, url_for, request, render_template
+from utils.utils import fetch_wfc_games
 
 misc_routes_bp = Blueprint("misc_routes", __name__)
-
-
-
-from flask import request, render_template
-from utils.utils import fetch_wfc_games
 
 @misc_routes_bp.route("/search", methods=["GET"])
 def search():

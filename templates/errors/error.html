@@ -1,0 +1,34 @@
+{% extends "generic/base.html" %} 
+
+{% block title %} {{ error_code }} | {{ error_title }} - WiiLink Internal {% endblock %} 
+
+{% block content %}
+
+<script src="//cdn.jsdelivr.net/npm/globe.gl"></script>
+<script type="module" src="/static/js/globe.js"></script>
+
+          <div
+        id="globeViz"
+        style="top:0px; left:calc(50% + 130px); filter:brightness(0.8); transform:translate(-50%, 0); z-index: 0; position:absolute;"
+      >
+      </div>
+
+<div class="top-1/2 -translate-y-1/2 flex flex-col items-center relative">
+    <h1 class="mb-2 text-5xl font-bold text-white">Error {{ error_code }}</h1>
+    <div class="relative group mb-10">
+        <div class="flex flex-col items-center">
+            <div class="flex items-center mb-6">
+                <h2 class="text-xl font-regular text-gray-300">{{ error_title }}</h2>
+            </div>
+            <div class="mb-6">
+                <div class="bg-gray-900/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700 mb-6">
+                    <p class="text-md text-white">{{ error_message }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}
+        

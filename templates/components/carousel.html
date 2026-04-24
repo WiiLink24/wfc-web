@@ -1,0 +1,68 @@
+{#
+Reusable carousel component
+Pass a variable `steps_json` (JSON string or list) and `carousel_id` (unique string for DOM ids)
+#}
+
+<div class="max-w-2xl mx-auto my-8 px-4">
+    <script id="{{ carousel_id }}-steps" type="application/json">
+    {{ steps_json|safe }}
+  </script>
+    <div>
+        <p id="{{ carousel_id }}-step-label" class="text-xs text-white mb-2"></p>
+        <div id="{{ carousel_id }}-card" class="bg-white/5 border border-white/10 rounded-xl p-7 min-h-52"></div>
+        <div class="flex items-center justify-between mt-5">
+            <button id="{{ carousel_id }}-prev"
+                class="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Back
+            </button>
+            <div id="{{ carousel_id }}-dots" class="flex items-center gap-2"></div>
+            <button id="{{ carousel_id }}-next"
+                class="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+                Next
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        const steps = JSON.parse(document.getElementById('{{ carousel_id }}-steps').textContent);
+        let current = 0;
+        const card = document.getElementById('{{ carousel_id }}-card');
+        const dotsEl = document.getElementById('{{ carousel_id }}-dots');
+        const label = document.getElementById('{{ carousel_id }}-step-label');
+        const btnPrev = document.getElementById('{{ carousel_id }}-prev');
+        const btnNext = document.getElementById('{{ carousel_id }}-next');
+        function render() {
+            const s = steps[current];
+            card.innerHTML = `\n      <div class=\"w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-2xl mb-4\"><img src=\"/static/icon/${s.icon}.svg\" alt=\"${s.name}\" class=\"w-8 h-8\"></div>\n      <h2 class=\"text-lg font-semibold text-white mb-3\">${s.name}</h2>\n      <div class=\"text-sm text-white/80 leading-relaxed space-y-1\">${s.html}</div>\n    `;
+            label.textContent = `Step ${current + 1} of ${steps.length}`;
+            btnPrev.disabled = current === 0;
+            btnNext.disabled = current === steps.length - 1;
+            dotsEl.innerHTML = '';
+            steps.forEach(function (_, i) {
+                const d = document.createElement('div');
+                if (i === current) {
+                    d.className = 'w-6 h-2 rounded-full bg-white cursor-pointer transition-all duration-200';
+                } else if (i < current) {
+                    d.className = 'w-2 h-2 rounded-full bg-green-500 cursor-pointer transition-all duration-200';
+                } else {
+                    d.className = 'w-2 h-2 rounded-full border-2 border-white/30 cursor-pointer transition-all duration-200';
+                }
+                d.title = steps[i].name;
+                d.addEventListener('click', function () { current = i; render(); });
+                dotsEl.appendChild(d);
+            });
+        }
+        btnPrev.addEventListener('click', function () { if (current > 0) { current--; render(); } });
+        btnNext.addEventListener('click', function () { if (current < steps.length - 1) { current++; render(); } });
+        render();
+    })();
+</script>

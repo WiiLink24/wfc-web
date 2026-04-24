@@ -1,0 +1,116 @@
+{% extends "generic/base.html" %}
+
+{% block title %}WiiLink WFC - Nintendo Wi-Fi Connection Revival{% endblock %}
+
+{% block content %}
+<div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 absolute" style="background-image: url('/static/img/bg.png');
+           -webkit-mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);">
+</div>
+<div class="mt-40 z-10 relative">
+    <div class="flex flex-col items-center mb-12">
+        <img src="/static/img/logo.svg" alt="WiiLink WFC Logo" class="w-80 mb-6" />
+        <p class="text-center text-xl text-gray-300 mb-6 max-w-3xl">
+            WiiLink Wi-Fi Connection (WWFC) is a service that allows you to play online games with your
+            friends on your Wii and Nintendo DS!
+        </p>
+        <div class="flex gap-4">
+            <a href="{{ url_for('pages.guide') }}"
+                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition duration-200 flex items-center">
+                <img src="/static/icon/book-open.svg" alt="Guide" class="w-5 h-5 invert mr-2" />
+                Installation Guide
+            </a>
+            <a href="{{ url_for('pages.launcher') }}"
+                class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition duration-200 flex items-center">
+                <img src="/static/icon/download.svg" alt="Launcher" class="w-5 h-5 invert mr-2" />
+                Download Launcher
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <div class="flex items-center gap-3 mb-8 card">
+            <img src="/static/icon/globe.svg" alt="Online" class="w-8 h-8 invert" />
+            <h2 class="text-4xl font-bold text-white">All Online Games</h2>
+        </div>
+
+        {% if online_stats %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for game in online_stats %}
+            <div>
+                {% set rec = game %}
+                {% include "components/generic_game_card.html" %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-12 text-center card">
+            <img src="/static/icon/circle-alert.svg" alt="Empty" class="w-12 h-12 invert mx-auto mb-4 opacity-50" />
+            <p class="text-gray-400 text-lg">No games online.</p>
+        </div>
+        {% endif %}
+
+        <div class="flex items-center gap-3 mb-8 mt-16 card">
+            <img src="/static/icon/star.svg" alt="Featured" class="w-8 h-8 invert" />
+            <h2 class="text-4xl font-bold text-white">Featured Games</h2>
+        </div>
+
+        {% if featured_games %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {% for game in featured_games %}
+            <div>
+                {% set rec = game %}
+                {% include "components/generic_game_card.html" %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-12 text-center card">
+            <img src="/static/icon/circle-alert.svg" alt="Empty" class="w-12 h-12 invert mx-auto mb-4 opacity-50" />
+            <p class="text-gray-400 text-lg">No featured games.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    @keyframes reveal-card {
+        from {
+            opacity: 0.15;
+            transform: scale(0.88) translateY(24px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .card {
+        animation: reveal-card linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 90%;
+    }
+
+    .animate-hue {
+        animation: hue-rotate 20s linear infinite;
+    }
+
+    @keyframes hue-rotate {
+        from {
+            filter: hue-rotate(0deg);
+        }
+
+        to {
+            filter: hue-rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    // Reload the page every 5 minutes to update online player counts
+    setTimeout(() => {
+        window.location.reload();
+    }, 5 * 60 * 1000);
+</script>

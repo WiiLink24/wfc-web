@@ -1,0 +1,38 @@
+
+{% extends "generic/base.html" %}
+{% block title %}Guide - WiiLink WFC{% endblock %}
+{% block content %}
+{% set guide_steps = [
+  {
+    "icon": "globe",
+    "name": "Connect to the internet",
+    "html": "<img src=\"/static/img/guide/wii/connset.png\" alt=\"Connect to the internet\" class=\"w-full rounded-lg mb-3\"> <p>Make sure your Wii is connected. Go to <strong>Wii Settings → Internet → Connection Settings</strong> and set up your Wi-Fi, then press <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>Test Connection</code>.</p>"
+  },
+  {
+    "icon": "download",
+    "name": "Download the Launcher",
+    "html": "<p>Download the <a href=\"/launcher\" class=\"flex inline-flex items-center px-3 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors\"><img src=\"/static/icon/download.svg\" alt=\"Download\" class=\"w-6 h-6 mr-2 invert\">Launcher</a> and copy it into the <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>apps</code> folder of your SD card.</p>"
+  },
+  {
+    "icon": "house",
+    "name": "Launch the application",
+    "html": "<p>Insert your SD card into your Wii and launch the Launcher from the Homebrew Channel.</p>"
+  },
+  {
+    "icon": "gamepad",
+    "name": "Insert a compatible game",
+    "html": "<p>Insert a WFC-compatible game disc into your Wii and wait for the Launcher to patch it.</p>"
+  },
+  {
+    "icon": "check-circle",
+    "name": "You're all set!",
+    "html": "<p>You're now connected to <strong>WiiLink WFC</strong>. If you need help, visit <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>#wfc-support</code> on our Discord.</p>"
+  }
+] %}
+{% set steps_json = guide_steps | tojson %}
+{% set carousel_id = 'guide' %}
+<div class="top-1/2 -translate-y-1/2 flex flex-col items-center relative">
+    <h1 class="mb-2 text-5xl font-bold text-white">Installation Guide</h1>
+    {% include 'components/carousel.html' %}
+</div>
+{% endblock %}

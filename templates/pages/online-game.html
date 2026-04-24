@@ -1,0 +1,98 @@
+{% extends "generic/base.html" %}
+{% block title %}{{ game.title_en or game.gamespy_id }} - WiiLink WFC{% endblock %}
+{% block content %}
+
+{% set cover = namespace(url='', fallback='') %}
+{% set cover_game = game %}
+{% include "components/game_cover_vars.html" %}
+
+<div class="absolute inset-x-0 top-0 h-[500px] bg-center bg-cover blur-lg opacity-10 z-0"
+    style="background-image: url('{{ cover.url }}'); -webkit-mask-image: linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0)); mask-image: linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0));">
+</div>
+
+<div class="max-w-5xl mx-auto my-8 px-4 view-transition z-10 relative" id="game-info">
+    <p class="mb-6 text-lg text-gray-600">>> <a href="/" class="text-gray-700 hover:underline">online</a> / {{ game.title_en }}</p>
+    <div class="flex flex-col md:flex-row gap-10 items-center">
+        <img src="{{ cover.url }}" alt="{{ game.title_en }} Cover" data-fallback="{{ cover.fallback }}"
+            onerror="if (!this.dataset.tried && this.dataset.fallback) { this.dataset.tried = '1'; this.src = this.dataset.fallback; } else { var placeholder = document.createElement('div'); placeholder.className = 'w-24 h-32 bg-gray-700 rounded-lg flex-shrink-0'; this.parentNode.replaceChild(placeholder, this); }"
+            class="w-[200px] object-cover rounded-lg flex-shrink-0"
+            style="view-transition-name: game-cover-{{ game.gamespy_id }};">
+        <div class="flex-1 flex flex-col gap-2">
+            {% if game.wfc_observations %}
+            {% for obs in game.wfc_observations %}
+            <span class="group relative inline-flex"
+                style="view-transition-name: game-observation-{{game.gamespy_id}};">
+                <span
+                    class="flex flex-row items-center gap-2 rounded-full px-2 py-1 {% if obs.icon == 'check-circle' %}bg-green-600/25 border border-green-500/40{% else %}bg-gray-800/70 border border-gray-700/80{% endif %}">
+                    <img src="/static/icon/{{ obs.icon }}.svg" alt="{{ obs.title }}" class="w-5 h-5 invert" />
+                    <span class="text-md font-regular text-white">{{ obs.title }}</span>
+                </span>
+                {% if obs.description %}
+                <span
+                    class="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden w-52 -translate-x-1/2 rounded-lg border border-gray-700 bg-gray-950/95 p-3 text-xs text-gray-200 shadow-2xl group-hover:block">
+                    <span class="block font-semibold text-white">{{ obs.title }}</span>
+                    <span class="mt-1 block text-gray-300">{{ obs.description }}</span>
+                </span>
+                {% endif %}
+            </span>
+            {% endfor %}
+            {% else %}
+            <span>
+                <span
+                    class="w-auto flex inline-flex items-center gap-2 rounded-full px-2 py-1 bg-gray-800/70 border border-gray-700/80"
+                    style="view-transition-name: game-observation-{{game.gamespy_id}};">
+                    <img src="/static/icon/circle-question-mark.svg" alt="No data" class="w-5 h-5 invert" />
+                    <span class="text-md font-regular text-white">No data</span>
+                </span>
+            </span>
+            {% endif %}
+            <h1 class="text-5xl font-bold text-white mt-3 mb-2"
+                style="view-transition-name: game-title-{{ game.gamespy_id }};">{{ game.title_en }}
+            </h1>
+            <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg"
+            style="view-transition-name: game-release-year-{{game.gamespy_id}};">
+                <span>{{ game.gamespy_id }}</span> •
+                {% if game.release_year %}<span>{{
+                    game.release_year }}</span>{% endif %}
+                {% if game.rating_type and game.rating_value %} •
+                <span style="view-transition-name: game-age-rating-{{game.gamespy_id}};">
+                    <img src="/static/ratings/{{ game.rating_type }}-{{ game.rating_value }}.jpg" alt="Rating"
+                        class="h-8 object-contain" />
+                </span>
+                {% endif %}
+            </div>
+                {% if game.input_controls %}
+    <div class="flex flex-row flex-wrap gap-2 mt-3 mb-2">
+        {% for ctrl in game.input_controls %}
+        <span class="flex items-center gap-1 px-2 py-1">
+            <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
+                style="filter:brightness(100000%);" />
+            {% if ctrl.required %}<span
+                class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{% endif
+            %}
+        </span>
+        {% endfor %}
+    </div>
+    {% endif %}
+        </div>
+    </div>
+    <p class="uppercase text-gray-400 text-xs mt-10 mb-3">Synopsis</p>
+    {% if game.genre %}
+    <div class="flex flex-row flex-wrap gap-2 mb-4">
+        {% for genre in game.genre.split(',') %}
+        <span
+            class="px-3 py-1 rounded-full bg-gray-900/70 border border-gray-600/60 text-gray-200 text-xs font-semibold uppercase tracking-wide">{{
+            genre.strip() }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <p class="max-h-[150px] text-gray-300 text-lg" style=" mask-image: linear-gradient(to bottom, #fff 80%, transparent 80%); -webkit-mask-image: linear-gradient(to bottom, #fff 0%, transparent 100%);">{{ game.synopsis_en }}</p>
+
+    <a href="https://checkout.wiilink.ca/search?search={{ game.title_en }}&type=title" target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition duration-200">
+        <img src="/static/icon/external-link.svg" alt="Buy" class="w-5 h-5 invert" />
+        View detailed stats on WiiLink Checkout
+    </a>
+</div>
+{% endblock %}

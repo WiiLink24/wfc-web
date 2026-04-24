@@ -1,0 +1,67 @@
+{% extends "generic/base.html" %}
+{% block title %}Search Results - WiiLink WFC{% endblock %}
+{% block content %}
+
+<div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 absolute" style="background-image: url('/static/img/bg.png');
+           -webkit-mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);">
+</div>
+
+<div class="h-full max-w-2xl mx-auto my-8 px-4 z-10 relative">
+    {% set no_results = not query or (query and not results) %}
+    <div class="{{ 'min-h-[60vh] h-full flex flex-col justify-center items-center' if no_results else '' }}">
+        <span class="w-full flex flex-col items-start">
+            <h1 class="text-3xl font-bold text-white">WFC Search</h1>
+            <p class="text-gray-400 mt-2 mb-6">Search all our WFC compatible games and software!</p>
+        </span>
+        <form action="/search" method="get"
+            class="sticky top-0 z-20 {{ '' if no_results else 'pt-6' }} mb-6 flex gap-1 w-full"
+            style="view-transition-name: searchbox;">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search supported titles..."
+                class="flex-1 px-4 py-3 rounded-l-xl rounded-r-md border border-gray-700 bg-gray-900 text-white focus:outline-none focus:border-indigo-500" />
+            <button type="submit"
+                class="px-8 py-3 rounded-l-md rounded-r-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-search-icon lucide-search">
+                    <path d="m21 21-4.34-4.34" />
+                    <circle cx="11" cy="11" r="8" />
+                </svg>
+            </button>
+        </form>
+        {% if query %}
+        {% if results %}
+        <h2 class="text-lg text-white mb-4">Results for "<b>{{ query }}</b>"</h2>
+        <div class="grid gap-6">
+            {% for rec in results %}
+            <div class="stagger-fade hover:z-10 z-0 relative" style="animation-delay: {{ loop.index0 * 60 }}ms;">
+                {% include "components/generic_game_card.html" %}
+            </div>
+            {% endfor %}
+        </div>
+        <style>
+            .stagger-fade {
+                opacity: 0;
+                transform: scale(0.96);
+                animation: staggerFadeIn 0.44s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }
+
+            @keyframes staggerFadeIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.96);
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+        </style>
+        {% else %}
+        <p class="w-full text-gray-400 text-left">No supported titles found for "{{ query }}".</p>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

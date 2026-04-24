@@ -18,6 +18,53 @@
         @view-transition {
             navigation: auto;
         }
+
+        /* Old page slides up and fades out */
+        @keyframes slide-out-up {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+        }
+
+        /* New page slides in from below */
+        @keyframes slide-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::view-transition-old(root) {
+            animation: slide-out-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        ::view-transition-new(root) {
+            animation: slide-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        /* Keep game cover/title transitions using their own crossfade */
+        ::view-transition-old(game-cover),
+        ::view-transition-new(game-cover),
+        ::view-transition-old(game-title),
+        ::view-transition-new(game-title) {
+            animation: none;
+        }
+
+        ::view-transition-old(sidebar),
+        ::view-transition-new(sidebar) {
+            animation: none;
+        }
     </style>
 </head>
 
@@ -30,7 +77,7 @@
         </button>
     </div>
     <div class="flex">
-        <div id="sidebar"
+        <div id="sidebar" style="view-transition-name: sidebar;"
             class="w-full max-w-[300px] h-screen bg-gray-900/30 backdrop-blur-xl border-r border-gray-800 p-6 fixed top-0 left-0 flex flex-col justify-between transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 overflow-scroll sm:overflow-visible">
             <div class="overflow-scroll sm:overflow-visible h-full">
                 <div class="mb-3 flex justify-between items-start">

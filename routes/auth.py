@@ -20,6 +20,8 @@ def get_logged_in_user_info():
         "preferred_username", "email", "name", "given_name"
     ])
     
+    print("OIDC user data:", user_data)  # Debugging output
+    
     if not user_data:
         return None
     
@@ -29,6 +31,7 @@ def get_logged_in_user_info():
         "full_name": user_data.get("name", ""),
         "email": user_data.get("email", ""),
         "profile_picture": generate_gravatar_url(user_data.get("email", "")),
+        "groups": user_data.get("groups", []),
     }
 
 

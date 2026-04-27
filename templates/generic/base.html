@@ -150,7 +150,7 @@
                 {% macro help_menu() %}
                 {% set help_items = [
                 {'label': 'Bans', 'endpoint': 'pages.rules', 'icon': 'gavel'},
-                {'label': 'Error Code Lookup', 'endpoint': 'pages.rules', 'icon': 'search-x'}
+                {'label': 'Error Code Lookup', 'endpoint': 'error_search.search_page', 'icon': 'search-x'}
                 ] %}
                 {{ dropdown_menu('help', 'Help', 'badge-question-mark', help_items) }}
                 {% endmacro %}

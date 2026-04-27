@@ -115,7 +115,6 @@ def find_user_by_wii_number(wii_number, attempt=0):
         response.raise_for_status()
         data = response.json()
         results = data.get("results", [])
-        print(results)
         if (
             not results and attempt < 10
         ):  # Honestly fuck you if you have more than 9 Wiis.

@@ -1,0 +1,19 @@
+{% macro arrow() %}<span class="mx-2 text-gray-500">&#8595;</span>{% endmacro %}
+{% macro collapse_section(title, content, id, collapsed=True) %}
+<div class="mb-2">
+    <button type="button"
+        class="w-full flex items-center justify-between px-4 py-2 bg-gray-800 rounded-lg text-left text-lg font-semibold text-indigo-300 hover:bg-gray-700 transition"
+        onclick="toggleCollapse('{{ id }}')">
+        <span>{{ title }}</span>
+        <svg id="arrow-{{ id }}" class="w-5 h-5 ml-2 transition-transform"
+            style="transform: rotate({{ '0' if collapsed else '90' }}deg);" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+    </button>
+    <div id="collapse-{{ id }}" class="overflow-hidden transition-all"
+        style="max-height: {{ '0' if collapsed else '1000px' }};">
+        <div class="px-4 py-2">{{ content }}</div>
+    </div>
+</div>
+{% endmacro %}

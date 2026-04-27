@@ -3,9 +3,24 @@ import json
 import psycopg2
 from psycopg2.extras import Json
 import config
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g
+from flask import Blueprint, render_template, request, redirect, url_for, flash, g, session, abort
+from functools import wraps
 
 from routes.auth import get_logged_in_user_info
+
+MODERATOR_GROUP_UUID = "22e7145f-d132-48de-a779-7967208e3dd2"
+
+def moderator_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        userData = get_logged_in_user_info()
+        if not userData:
+            abort(401)
+        user_groups = userData['groups']
+        if MODERATOR_GROUP_UUID not in user_groups:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
 
 moderation_bp = Blueprint("moderation", __name__, url_prefix="/moderation")
 
@@ -128,6 +143,7 @@ def update_title_support_and_observations(game_id, is_supported, observation=Non
 
 
 @moderation_bp.route("/titles", methods=["GET", "POST"])
+@moderator_required
 def titles_panel():
     """Moderation panel for title support and observations."""
     if not getattr(g, "oidc_user", None) or not g.oidc_user.logged_in:
@@ -196,6 +212,7 @@ def titles_panel():
 
 
 @moderation_bp.route("/<game_id>", methods=["GET", "POST"])
+@moderator_required
 def moderation_edit(game_id):
     """Edit a title by Game ID (string or int)."""
     if not getattr(g, "oidc_user", None) or not g.oidc_user.logged_in:

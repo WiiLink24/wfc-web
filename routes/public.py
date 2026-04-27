@@ -9,7 +9,6 @@ public_routes_bp = Blueprint("public_routes", __name__)
 def index():
     """Main page showing featured games."""
     featured_games = fetch_featured_wfc_games()
-    print(featured_games)
     online_stats = fetch_online_wfc_games()
     user_info = get_logged_in_user_info()
     return render_template(

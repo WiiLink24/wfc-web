@@ -1,0 +1,195 @@
+{% extends "generic/base.html" %}
+{% import "components/collapse_macros.html" as macros %}
+{% block title %}Error Code Lookup - WiiLink WFC{% endblock %}
+{% block content %}
+
+<div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 fixed" style="background-image: url('/static/img/bg.png');
+           -webkit-mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           view-transition-name: header-bg;
+           ">
+</div>
+
+<div class="h-full flex flex-col justify-center max-w-xl mx-auto my-16 p-8 relative">
+    <span style="view-transition-name: searchbox;">
+        <h1 class="text-3xl font-bold text-white mb-6">Error Code Lookup</h1>
+        <div class="relative perspective-1000">
+            <form method="get" id="error-form"
+                class="flex gap-2 justify-center mb-3 bg-gray-900/80 rounded-xl border border-gray-800 shadow-lg p-8 transition-transform duration-500"
+                autocomplete="off">
+                <input type="hidden" name="code" id="code-input" />
+                <div id="flip-container" class="relative w-full h-16" style="min-width: 260px;">
+                    <div id="flip-inner" class="absolute w-full h-full transition-transform duration-500"
+                        style="transform-style: preserve-3d;">
+                        <div id="front" class="w-full h-full flex gap-2 justify-center items-center backface-hidden">
+                            {% set code_str = code if code and code|length == 5 and code.isdigit() else '' %}
+                            {% for i in range(5) %}
+                            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]"
+                                value="{{ code_str[i] if code_str else '' }}"
+                                class="digit w-12 h-16 text-3xl text-center rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:border-indigo-500 transition-all caret-transparent"
+                                required />
+                            {% endfor %}
+                        </div>
+                        <div id="back"
+                            class="w-full h-full flex justify-center items-center absolute top-0 left-0 backface-hidden"
+                            style="transform: rotateY(180deg);">
+                            <input type="text" id="advanced-input"
+                                class="w-full h-16 text-2xl text-center rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:border-indigo-500 transition-all px-4"
+                                placeholder="Enter any error text or code..." value="{{ code or '' }}" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <button id="toggle-advanced" type="button"
+            class="w-full mb-8 px-3 py-3 rounded-xl bg-gray-900 text-gray-200 text-sm font-semibold shadow hover:bg-indigo-600 transition">Advanced
+            Search</button>
+    </span>
+    {% if not code %}
+    <div class="text-gray-400 text-lg">Enter the 5-digit error code shown on your screen to look up details.</div>
+    {% elif result %}
+    <div class="mt-8">
+        {% if not result.found %}
+        <div class='text-red-400 text-lg font-semibold'>No info found for code <b>{{ result.error }}</b></div>
+        {% else %}
+        {% set classInfo = result.infolist|selectattr('type', 'equalto', 'Class')|first %}
+        {% set sectionInfo = result.infolist|selectattr('type', 'equalto', 'Section')|first %}
+        {% set errorInfo = result.infolist|selectattr('type', 'equalto', 'Error')|first %}
+        {% if classInfo %}
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.05s;'>
+            <div
+                class='w-full flex items-center justify-between px-4 py-2 bg-gray-900/60 rounded-lg text-lg font-semibold text-indigo-300'>
+                <span class="flex flex-col"><span class="text-sm text-gray-600">Class</span> <span
+                        class='text-gray-200'>{{ classInfo.name }}</span></span>
+                <span class='ml-2 text-gray-400 font-regular'>{{ classInfo.info }}</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if sectionInfo %}
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.15s;'>
+            <div
+                class='w-full flex items-center justify-between px-4 py-2 bg-gray-900/60 rounded-lg text-lg font-semibold text-indigo-300'>
+                <span class="flex flex-col"><span class="text-sm text-gray-600">Section</span> <span
+                        class='text-gray-200'>{{ sectionInfo.name }}</span></span>
+                <span class='ml-2 text-gray-400 font-regular'>{{ sectionInfo.info }}</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if errorInfo %}
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.25s;'>
+            <div class='w-full flex items-center px-4 py-2 bg-gray-800 rounded-lg text-2xl font-bold text-white'>
+                Error <span class='ml-2 text-blue-400'>{{ errorInfo.name }}</span>
+            </div>
+            <div class='px-4 py-2 text-lg text-white mb-2'>{{ errorInfo.info }}</div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+<script>
+    const inputs = [...document.querySelectorAll('.digit')];
+    const form = document.getElementById('error-form');
+    const codeInput = document.getElementById('code-input');
+    const toggleBtn = document.getElementById('toggle-advanced');
+    const flipInner = document.getElementById('flip-inner');
+    const advancedInput = document.getElementById('advanced-input');
+    let advanced = false;
+
+    function getCode() {
+        return inputs.map(el => el.value).join('');
+    }
+
+    function submit() {
+        codeInput.value = advanced ? advancedInput.value : getCode();
+        form.submit();
+    }
+
+    inputs.forEach((input, i) => {
+        input.addEventListener('focus', () => input.select());
+
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Backspace') {
+                if (input.value) {
+                    input.value = '';
+                } else if (i > 0) {
+                    inputs[i - 1].focus();
+                    inputs[i - 1].value = '';
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                if (i > 0) inputs[i - 1].focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                if (i < inputs.length - 1) inputs[i + 1].focus();
+                e.preventDefault();
+            }
+        });
+
+        input.addEventListener('input', () => {
+            const digits = input.value.replace(/\D/g, '');
+            if (!digits) { input.value = ''; return; }
+
+            [...digits].forEach((d, offset) => {
+                if (inputs[i + offset]) inputs[i + offset].value = d;
+            });
+
+            const next = inputs.slice(i + digits.length).find(el => !el.value);
+            (next || inputs[Math.min(i + digits.length, inputs.length - 1)]).focus();
+
+            if (getCode().length === 5) submit();
+        });
+
+        input.addEventListener('paste', e => {
+            e.preventDefault();
+            const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, inputs.length);
+            [...digits].forEach((d, j) => { inputs[j].value = d; });
+            (inputs[digits.length] || inputs[inputs.length - 1]).focus();
+
+            if (getCode().length === 5) submit();
+        });
+    });
+
+    advancedInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') submit();
+    });
+
+    toggleBtn.addEventListener('click', () => {
+        advanced = !advanced;
+        if (advanced) {
+            flipInner.style.transform = 'rotateY(180deg)';
+            toggleBtn.textContent = 'Standard Search';
+            advancedInput.focus();
+        } else {
+            flipInner.style.transform = 'rotateY(0deg)';
+            toggleBtn.textContent = 'Advanced Search';
+            inputs[0].focus();
+        }
+    });
+</script>
+<style>
+    .perspective-1000 {
+        perspective: 1000px;
+    }
+
+    .backface-hidden {
+        backface-visibility: hidden;
+    }
+
+    @keyframes fadeup {
+        0% {
+            opacity: 0;
+            transform: translateY(1.5rem);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fadeup {
+        animation: fadeup 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+</style>
+{% endblock %}

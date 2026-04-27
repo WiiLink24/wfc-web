@@ -9,7 +9,6 @@ from routes.auth import auth_routes_bp, set_oidc, get_logged_in_user_info
 from routes.misc import misc_routes_bp
 from routes.pages import pages_bp
 from routes.moderation import moderation_bp
-from routes.error_search import error_search_bp
 from routes.dummy import dummy_bp
 
 app = Flask(__name__)
@@ -50,9 +49,6 @@ app.register_blueprint(auth_routes_bp)
 app.register_blueprint(misc_routes_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(moderation_bp)
-
-# Register error search blueprint
-app.register_blueprint(error_search_bp)
 
 
 # Global error handlers

@@ -6,6 +6,17 @@ import hashlib
 WFC_STATS_API = "http://localhost:8080/api/dummy_stats"
 WFC_GROUPS_API = "https://api.wfc.wiilink.ca/api/groups"
 
+BAN_INFO_API = "http://localhost:8080/api/dummy/baninfo?q={query}"
+
+def fetch_ban_info(query):
+    try:
+        resp = requests.get(BAN_INFO_API.format(query=query), timeout=10)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"Error fetching ban info: {e}")
+        return {"error": query, "found": 0, "infolist": []}
+
 def get_serial_prefixes(user_info):
     wiis = user_info.get("wiis")
     if not wiis:

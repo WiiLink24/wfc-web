@@ -1,7 +1,50 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
+import requests
+from utils.utils import fetch_ban_info, fetch_wfc_game_data, fetch_ban_info, find_user_by_wii_number
+from utils.helpers import is_public_profile, parse_fc
+from routes.auth import get_logged_in_user_info
+from routes.auth import _oidc
 
 pages_bp = Blueprint("pages", __name__)
 
+@pages_bp.route("/ban-search", methods=["GET"])
+def ban_search():
+    code = request.args.get("q", "")
+    logged_in_user = get_logged_in_user_info()
+    user_data = None
+    if _oidc and _oidc.user_loggedin:
+        user_data = _oidc.user_getinfo([
+            "sub", "email", "email_verified", "name", "given_name", "preferred_username", "nickname", "groups", "wiis", "public_profile", "nonce"
+        ])
+    
+    if code:
+        ban_info = fetch_ban_info(parse_fc(code))
+        user_found = find_user_by_wii_number(parse_fc(ban_info.get("fc", ""))) if ban_info else None
+        
+        if not user_found:
+            return render_template("errors/baninfo_search.html", fc=code, result=ban_info, user_data=user_data)
+        
+        if is_public_profile(user_found, logged_in_user):
+            return render_template("errors/baninfo_search.html", fc=code, result=ban_info, user_data=user_data)
+        else:
+            return render_template("errors/baninfo_search.html", fc=code, result={"error": "not_public"}, user_data=user_data)
+    
+    return render_template("errors/baninfo_search.html", user_data=user_data)
+
+@pages_bp.route("/error-search", methods=["GET"])
+def error_search():
+    code = request.args.get("code", "")
+    result = None
+    if code:
+        try:
+            resp = requests.get(f"https://wfc-error.wiilink.ca/error?code={code}", timeout=3)
+            if resp.status_code == 200:
+                result = resp.json()[0]
+            else:
+                result = {"error": code, "found": 0, "infolist": []}
+        except Exception:
+            result = {"error": code, "found": 0, "infolist": []}
+    return render_template("errors/error_search.html", code=code, result=result)
 
 
 @pages_bp.route("/rules")
@@ -15,8 +58,6 @@ def online():
     """List of all online games."""
     return render_template("pages/online.html")
 
-
-from utils.utils import fetch_wfc_game_data
 
 @pages_bp.route("/online/<gamespy_id>")
 def online_game(gamespy_id):

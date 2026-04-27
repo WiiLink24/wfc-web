@@ -1,0 +1,91 @@
+{% extends "generic/base.html" %}
+{% block title %}Ban Info Lookup - WiiLink WFC{% endblock %}
+{% block content %}
+<div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 fixed" style="background-image: url('/static/img/bg.png');
+           -webkit-mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           view-transition-name: header-bg;
+           ">
+</div>
+<div class="h-full flex flex-col justify-center max-w-xl mx-auto my-16 p-8 relative">
+    <span style="view-transition-name: searchbox;">
+        <h1 class="text-3xl font-bold text-white mb-6">Ban Info Lookup</h1>
+        <form method="get"
+            class="flex gap-2 justify-center mb-3 bg-gray-900/80 rounded-xl border border-gray-800 shadow-lg p-8 transition-transform duration-500"
+            autocomplete="off">
+            <input type="text" name="q" maxlength="16" placeholder="Enter Friend Code" value="{{ fc or '' }}"
+                class="w-full h-16 text-2xl text-center rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:border-indigo-500 transition-all px-4"
+                required />
+        </form>
+        {% if user_data and user_data.wiis %}
+        {% for wii in user_data.wiis %}
+        {% if wii.wii_number %}
+        <form method="get" class="flex justify-center mb-3" autocomplete="off">
+            <input type="hidden" name="q" value="{{ wii.wii_number }}" />
+            <button type="submit"
+                class="w-full mb-8 px-3 py-3 rounded-xl bg-gray-900 text-gray-200 text-sm font-semibold shadow hover:bg-indigo-600 transition">
+                Check Status for {{ wii.wii_number }}
+            </button>
+        </form>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </span>
+    {% if not fc %}
+    <div class="text-gray-400 text-lg">Enter a Friend Code to look up ban information.</div>
+    {% elif result %}
+    <div class="mt-8">
+        {% if result.error and result.error == "not_public" %}
+        <div class="text-red-400 text-lg font-semibold">Profile <b>{{ fc }}</b> is not public.</div>
+        {% elif result.error %}
+        <div class="text-red-400 text-lg font-semibold">No results found for <b>{{ fc }}</b>.</div>
+        {% else %}
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.05s;'>
+            <div
+                class='w-full flex items-center justify-between px-4 py-2 bg-gray-900/60 rounded-lg text-lg font-semibold text-indigo-300'>
+                <span class="flex flex-col"><span class="text-sm text-gray-600">Profile ID</span> <span
+                        class='text-gray-200'>{{ result.pid }}</span></span>
+                <span class='ml-2 text-gray-400 font-regular'>Friend Code: {{ result.fc }}</span>
+            </div>
+        </div>
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.15s;'>
+            <div
+                class='w-full flex items-center justify-between px-4 py-2 bg-gray-900/60 rounded-lg text-lg font-semibold text-indigo-300'>
+                <span class="flex flex-col"><span class="text-sm text-gray-600">In-Game Name</span> <span
+                        class='text-gray-200'>{{ result.name }}</span></span>
+                <span class='ml-2 text-gray-400 font-regular'>Reason: {{ result.reason }}</span>
+            </div>
+        </div>
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.25s;'>
+            <div class='w-full flex items-center px-4 py-2 bg-gray-800 rounded-lg text-lg font-bold text-white'>
+                TOS Violation: <span class='ml-2 text-blue-400'>{{ 'Yes' if result.tos else 'No' }}</span>
+            </div>
+        </div>
+        <div class='mb-2 opacity-0 translate-y-4 animate-fadeup' style='animation-delay: 0.35s;'>
+            <div class='w-full flex items-center px-4 py-2 bg-gray-800 rounded-lg text-lg text-white'>
+                Issued: {{ result.issued }}<br>
+                Expires: {{ result.expires }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+<style>
+    .animate-fadeup {
+        animation: fadeup 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    @keyframes fadeup {
+        0% {
+            opacity: 0;
+            transform: translateY(1.5rem);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

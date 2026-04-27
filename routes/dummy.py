@@ -1,5 +1,6 @@
 import random
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
+from datetime import datetime, timedelta
 
 dummy_bp = Blueprint("dummy", __name__)
 
@@ -20,3 +21,29 @@ def dummy_stats():
         "groups": sum(d["groups"] for d in data.values()),
     }
     return jsonify(data)
+
+@dummy_bp.route("/api/dummy/baninfo", methods=["GET"])
+def dummy_baninfo():
+    q = request.args.get("q", "")
+    print(f"Received baninfo request with q={q}")
+    """
+    Dummy endpoint for ban info. Returns a static example response.
+    """
+    response = {
+        "pid": 123456789,
+        "fc": "5261793740959345",
+        "name": "TestUser",
+        "reason": "Violation of rules",
+        "tos": True,
+        "issued": datetime.utcnow().isoformat() + 'Z',
+        "expires": (datetime.utcnow() + timedelta(days=7)).isoformat() + 'Z'
+    }
+    
+    if q:
+        if q.isdigit() and int(q) == response["pid"]:
+            return jsonify(response)
+        elif q == response["fc"]:
+            return jsonify(response)
+        else:
+            return jsonify({"error": "ban not found"}), 404
+    return jsonify(response)

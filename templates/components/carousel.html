@@ -1,8 +1,3 @@
-{#
-Reusable carousel component
-Pass a variable `steps_json` (JSON string or list) and `carousel_id` (unique string for DOM ids)
-#}
-
 <div class="max-w-2xl mx-auto my-8 px-4">
     <script id="{{ carousel_id }}-steps" type="application/json">
     {{ steps_json|safe }}

@@ -1,6 +1,6 @@
 {% extends "generic/base.html" %}
 
-{% block title %}WiiLink WFC - Nintendo Wi-Fi Connection Revival{% endblock %}
+{% block title %}WiiLink WFC - Popular and Online games{% endblock %}
 
 {% block content %}
 <div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 absolute" style="background-image: url('/static/img/bg.png');
@@ -9,14 +9,14 @@
            view-transition-name: header-bg;
            ">
 </div>
-<div class="mt-40 z-10 relative">
+<div class="px-5 mt-40 z-10 relative">
     <div class="flex flex-col items-center mb-12">
-        <img src="/static/img/logo.svg" alt="WiiLink WFC Logo" class="w-80 mb-6" />
+        <img src="/static/img/logo.svg" alt="WiiLink WFC Logo" class="w-60 md:w-80 mb-6" />
         <p class="text-center text-xl text-gray-300 mb-6 max-w-3xl">
             WiiLink Wi-Fi Connection (WWFC) is a service that allows you to play online games with your
             friends on your Wii and Nintendo DS!
         </p>
-        <div class="flex gap-4">
+        <div class="flex flex-col md:flex-row w-full md:w-auto gap-4">
             <a href="{{ url_for('pages.guide') }}"
                 class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition duration-200 flex items-center">
                 <img src="/static/icon/book-open.svg" alt="Guide" class="w-5 h-5 invert mr-2" />
@@ -31,12 +31,15 @@
     </div>
 
     <div class="mb-12">
+        {% if online_stats %}
         <div class="flex items-center gap-3 mb-8 card">
             <img src="/static/icon/globe.svg" alt="Online" class="w-8 h-8 invert" />
-            <h2 class="text-4xl font-bold text-white">All Online Games</h2>
+            <span class="flex flex-col gap-1">
+                <h2 class="text-4xl font-bold text-white">All Online Games</h2>
+                <p class="text-white/60">Currently there are <b>{{ online_totals.online }}</b> players online across <b>{{ online_totals.games }}</b> games.</p>
+            </span>
         </div>
 
-        {% if online_stats %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for game in online_stats %}
             <div>
@@ -45,16 +48,15 @@
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-12 text-center card">
-            <img src="/static/icon/circle-alert.svg" alt="Empty" class="w-12 h-12 invert mx-auto mb-4 opacity-50" />
-            <p class="text-gray-400 text-lg">No games online.</p>
-        </div>
         {% endif %}
 
         <div class="flex items-center gap-3 mb-8 mt-16 card">
             <img src="/static/icon/star.svg" alt="Featured" class="w-8 h-8 invert" />
-            <h2 class="text-4xl font-bold text-white">Featured Games</h2>
+            <span class="flex flex-col gap-1">
+                <h2 class="text-4xl font-bold text-white">Featured Games</h2>
+                <p class="text-white/60">We currently support <b>{{ compat_totals.full }}</b> games with full support and <b>{{
+                    compat_totals.partial }}</b> games with partial support.</p>
+            </span>
         </div>
 
         {% if featured_games %}

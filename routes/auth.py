@@ -20,8 +20,6 @@ def get_logged_in_user_info():
         "preferred_username", "email", "name", "given_name"
     ])
     
-    print("OIDC user data:", user_data)  # Debugging output
-    
     if not user_data:
         return None
     
@@ -37,7 +35,6 @@ def get_logged_in_user_info():
 
 @auth_routes_bp.route("/login")
 def login():
-    """OIDC login route."""
     if _oidc:
         return _oidc.oidc_auth("public_routes.index")
     return redirect(url_for("public_routes.index"))
@@ -45,6 +42,5 @@ def login():
 
 @auth_routes_bp.route("/logout")
 def logout():
-    """OIDC logout route."""
     _oidc.oidc_logout()
     return redirect(url_for("public_routes.index"))

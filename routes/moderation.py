@@ -8,7 +8,9 @@ from functools import wraps
 
 from routes.auth import get_logged_in_user_info
 
-MODERATOR_GROUP_UUID = "22e7145f-d132-48de-a779-7967208e3dd2"
+import config
+
+MODERATOR_GROUP_UUID = getattr(config, "moderator_group_uuid", "")
 
 def moderator_required(f):
     @wraps(f)
@@ -237,7 +239,7 @@ def moderation_edit(game_id):
     if request.method == "POST":
         new_gamespy_id = request.form.get("gamespy_id", "").strip()
         is_supported = int(request.form.get("is_supported", title.get("is_supported", 0)))
-        is_featured = bool(request.form.get("is_featured"))
+        is_featured = '1' in request.form.getlist("is_featured")
 
         if "remove_obs" in request.form:
             observations = []

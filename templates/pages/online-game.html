@@ -11,7 +11,8 @@
 </div>
 
 <div class="max-w-5xl mx-auto my-8 px-4 view-transition z-10 relative" id="game-info">
-    <p class="mb-6 text-lg text-gray-600">>> <a href="/" class="text-gray-700 hover:underline">online</a> / {{ game.title_en }}</p>
+    <p class="mb-6 text-lg text-gray-600 hidden lg:block">>> <a href="/" class="text-gray-700 hover:underline">online</a> / {{
+        game.title_en }}</p>
     <div class="flex flex-col md:flex-row gap-10 items-center">
         <img src="{{ cover.url }}" alt="{{ game.title_en }} Cover" data-fallback="{{ cover.fallback }}"
             onerror="if (!this.dataset.tried && this.dataset.fallback) { this.dataset.tried = '1'; this.src = this.dataset.fallback; } else { var placeholder = document.createElement('div'); placeholder.className = 'w-24 h-32 bg-gray-700 rounded-lg flex-shrink-0'; this.parentNode.replaceChild(placeholder, this); }"
@@ -21,19 +22,12 @@
             {% if game.wfc_observations %}
             {% for obs in game.wfc_observations %}
             <span class="group relative inline-flex"
-                style="view-transition-name: game-observation-{{game.gamespy_id}};">
+                style="view-transition-name: game-observations-{{game.gamespy_id}};">
                 <span
                     class="flex flex-row items-center gap-2 rounded-full px-2 py-1 {% if obs.icon == 'check-circle' %}bg-green-600/25 border border-green-500/40{% else %}bg-gray-800/70 border border-gray-700/80{% endif %}">
                     <img src="/static/icon/{{ obs.icon }}.svg" alt="{{ obs.title }}" class="w-5 h-5 invert" />
                     <span class="text-md font-regular text-white">{{ obs.title }}</span>
                 </span>
-                {% if obs.description %}
-                <span
-                    class="pointer-events-none absolute left-1/2 top-full z-50 mt-2 hidden w-52 -translate-x-1/2 rounded-lg border border-gray-700 bg-gray-950/95 p-3 text-xs text-gray-200 shadow-2xl group-hover:block">
-                    <span class="block font-semibold text-white">{{ obs.title }}</span>
-                    <span class="mt-1 block text-gray-300">{{ obs.description }}</span>
-                </span>
-                {% endif %}
             </span>
             {% endfor %}
             {% else %}
@@ -50,7 +44,7 @@
                 style="view-transition-name: game-title-{{ game.gamespy_id }};">{{ game.title_en }}
             </h1>
             <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg"
-            style="view-transition-name: game-release-year-{{game.gamespy_id}};">
+                style="view-transition-name: game-release-year-{{game.gamespy_id}};">
                 <span>{{ game.gamespy_id }}</span> •
                 {% if game.release_year %}<span>{{
                     game.release_year }}</span>{% endif %}
@@ -60,39 +54,211 @@
                         class="h-8 object-contain" />
                 </span>
                 {% endif %}
+                {% if game.input_players and game.input_players > 0 %} •
+                <span class="flex flex-row items-center gap-1">
+                    <img src="/static/icon/users.svg" alt="Players" class="h-5 inline invert" />
+                    {{ game.input_players }}
+                    {% if game.input_players == 1 %}Player{% else %}Players{% endif %}
+                </span>
+                {% endif %}
+                {% if game.wifi_players and game.wifi_players > 0 %} •
+                <span class="flex flex-row items-center gap-1">
+                    <img src="/static/icon/globe.svg" alt="Online Players" class="h-5 inline invert" />
+                    {{ game.wifi_players }}
+                    {% if game.wifi_players == 1 %}WFC Player{% else %}WFC Players{% endif %}
+                </span>
+                {% endif %}
             </div>
-                {% if game.input_controls %}
-    <div class="flex flex-row flex-wrap gap-2 mt-3 mb-2">
-        {% for ctrl in game.input_controls %}
-        <span class="flex items-center gap-1 px-2 py-1">
-            <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
-                style="filter:brightness(100000%);" />
-            {% if ctrl.required %}<span
-                class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{% endif
-            %}
-        </span>
-        {% endfor %}
-    </div>
-    {% endif %}
+            {% if game.input_controls %}
+            <div class="flex flex-row flex-wrap gap-2 mt-3 mb-2">
+                {% for ctrl in game.input_controls %}
+                <span class="flex items-center gap-1 px-2 py-1 fadein-control"
+                    style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                    <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
+                        style="filter:brightness(100000%);" />
+                    {% if ctrl.required %}<span
+                        class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{%
+                    endif
+                    %}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
-    <p class="uppercase text-gray-400 text-xs mt-10 mb-3">Synopsis</p>
-    {% if game.genre %}
-    <div class="flex flex-row flex-wrap gap-2 mb-4">
-        {% for genre in game.genre.split(',') %}
-        <span
-            class="px-3 py-1 rounded-full bg-gray-900/70 border border-gray-600/60 text-gray-200 text-xs font-semibold uppercase tracking-wide">{{
-            genre.strip() }}</span>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <p class="max-h-[150px] text-gray-300 text-lg" style=" mask-image: linear-gradient(to bottom, #fff 80%, transparent 80%); -webkit-mask-image: linear-gradient(to bottom, #fff 0%, transparent 100%);">{{ game.synopsis_en }}</p>
 
-    <a href="https://checkout.wiilink.ca/search?search={{ game.title_en }}&type=title" target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition duration-200">
-        <img src="/static/icon/external-link.svg" alt="Buy" class="w-5 h-5 invert" />
-        View detailed stats on WiiLink Checkout
-    </a>
+    <p class="uppercase text-gray-400 text-xs mt-10 mb-3">Live Player Data</p>
+    <span id="live-player-data"
+        class="mb-3 flex flex-row items-center justify-between w-full px-6 py-3 rounded-full bg-gray-900/30 text-white"
+        style="view-transition-name: live-player-data-{{game.gamespy_id}};">
+        <span id="players-online">
+            {% if live_stats and live_stats.players_online > 0 %}
+            <span class="flex items-center gap-1">
+                {% set max_icons = 50 %}
+                <span class="flex items-center gap-1">
+                    {% set colors =
+                    ['#f87171','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#facc15','#38bdf8','#4ade80','#f472b6']
+                    %}
+                    {% for i in range(live_stats.players_online if live_stats.players_online < max_icons else max_icons)
+                        %} {% set color=colors|random %} <span class="w-2 h-5 relative">
+                        <div class="w-5 h-5 rounded-full absolute animate-jump"
+                            style="background: {{ color }}; border: 2px solid rgb(14 21 35); animation-delay: {{ (i * 0.2)|round(2) }}s; animation-iteration-count: infinite; animation-name: jump, none; animation-fill-mode: both; animation-timing-function: ease-in-out;">
+                        </div>
+                </span>
+                {% endfor %}
+            </span>
+            <span class="ml-3"><b>{{ live_stats.players_online }}</b> online</span>
+        </span>
+        {% else %}
+        <span class="flex items-center gap-1">
+            <img src="/static/icon/globe.svg" alt="Online Players" class="h-5 inline invert" />
+            <b>0</b> Online
+        </span>
+        {% endif %}
+    </span>
+    <span id="groups" class="flex items-center gap-1"><img src="/static/icon/users.svg" alt="Rooms"
+            class="h-5 inline invert" /> <b>{{ live_stats.groups if live_stats else 0 }}</b> Rooms</span>
+    <span id="active" class="flex items-center gap-1"><img src="/static/icon/gamepad.svg" alt="Active"
+            class="h-5 inline invert" /> <b>{{ live_stats.active if live_stats else 0 }}</b> Active</span>
+    </span>
+    <script>
+        function updateLivePlayerData() {
+            fetch('/api/online/{{ game.gamespy_id }}')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.live_stats) {
+                        document.getElementById('players-online').textContent = data.live_stats.players_online;
+                        document.getElementById('groups').textContent = data.live_stats.groups;
+                        document.getElementById('active').textContent = data.live_stats.active;
+                    }
+                });
+        }
+        setInterval(updateLivePlayerData, 10000);
+    </script>
+
+    {% if groups_data %}
+    {% if special_template != None %}
+    {% include "components/groups/" ~ special_template %}
+    {% else %}
+    <div id="groups_container" class="space-y-6 w-full">
+        {% for group in groups_data %}
+        {% set host_name = 'Awaiting host...' %}
+        {% if group.host is not none and group.host != '' %}
+        {% set host_idx = group.host|int(default=-1) %}
+        {% if host_idx >= 0 and host_idx < (group.players|length) %} {% set host_name="<span class='font-regular'><b>" ~
+            group.players[host_idx].name ~ "</b>'s room</span>" %} {% endif %} {% endif %} <div
+            class="rounded-2xl bg-gray-900/40 p-4">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <div class="text-white font-semibold text-lg">{{ host_name|safe }}</div>
+                    <div class="text-sm text-gray-400">ID: <span class="font-mono">{{ group.id }}</span> {% if
+                        group.created %}• {{ group.created }}{% endif %}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 text-sm rounded-full text-white bg-gray-700">{{ group.type }}</span>
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {% for player in group.players %}
+                <div class="flex items-center justify-between gap-4 p-3 rounded-xl bg-gray-900">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="min-w-0">
+                            <div class="text-white font-semibold truncate">{{ player.name }}</div>
+                            <div class="text-sm text-gray-400 truncate">{{ player.fc }}</div>
+                        </div>
+                    </div>
+                    <div class="h-full flex flex-col justify-end items-end text-sm text-gray-300">
+                        {% if player.pid %}
+                        <div class="text-xs text-gray-500 mt-2">PID: <span class="font-mono">{{ player.pid }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+    </div>
+    {% endfor %}
 </div>
+{% endif %}
+<button onclick="location.reload()" class="inline-flex items-center gap-3 mt-2 mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition duration-200">
+    <img src="/static/icon/refresh.svg" alt="Refresh" class="w-5 h-5 invert" />
+    Refresh Data
+</button>
+{% endif %}
+
+{% if game.wfc_observations %}
+<div class="hidden md:block my-3 opacity-30 hover:opacity-100 transition-opacity">
+    {% for obs in game.wfc_observations %}
+    <span class="group relative inline-flex items-center">
+        <img src="/static/icon/{{ obs.icon }}.svg" alt="{{ obs.title }}" class="mr-3 w-5 h-5 invert" />
+        <span class="text-md font-regular text-white">{{ obs.title }}</span>
+        {% if obs.description %}
+        <span class="ml-1 block text-gray-300"> • {{ obs.description }}</span>
+        {% endif %}
+    </span>
+    {% endfor %}
+</div>
+{% endif %}
+
+<p class="uppercase text-gray-400 text-xs mt-10 mb-3">Synopsis</p>
+{% if game.genre %}
+<div class="flex flex-row flex-wrap gap-2 mb-4">
+    {% for genre in game.genre.split(',') %}
+    <span
+        class="px-3 py-1 rounded-full bg-gray-900/70 border border-gray-600/60 text-gray-200 text-xs font-semibold uppercase tracking-wide">{{
+        genre.strip() }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+<p class="max-h-[150px] text-gray-300 text-lg"
+    style=" mask-image: linear-gradient(to bottom, #fff 80%, transparent 80%); -webkit-mask-image: linear-gradient(to bottom, #fff 0%, transparent 100%);">
+    {{ game.synopsis_en }}</p>
+
+<a href="https://checkout.wiilink.ca/search?search={{ game.title_en }}&type=title" target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center gap-2 mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition duration-200">
+    <img src="/static/icon/external-link.svg" alt="Buy" class="w-5 h-5 invert" />
+    View detailed stats on WiiLink Checkout
+</a>
+</div>
+
+<style>
+    @keyframes jump {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        30% {
+            transform: translateY(-3px);
+        }
+
+        60% {
+            transform: translateY(0);
+        }
+    }
+
+    .animate-jump {
+        animation: jump 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+</style>
+<style>
+    .fadein-control {
+        opacity: 0;
+        animation: fadein-stagger 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes fadein-stagger {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 {% endblock %}

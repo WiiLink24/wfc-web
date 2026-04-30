@@ -23,7 +23,7 @@
         <form method="get" class="flex justify-center mb-1" autocomplete="off">
             <input type="hidden" name="q" value="{{ wii.wii_number }}" />
             <button type="submit"
-                class="w-full mb-8 px-3 py-3 rounded-xl bg-gray-900 text-gray-200 text-sm font-semibold shadow hover:bg-indigo-600 transition">
+                class="w-full px-3 py-3 rounded-xl bg-gray-900 text-gray-200 text-sm font-semibold shadow hover:bg-indigo-600 transition">
                 Check Status for {{ wii.wii_number }}
             </button>
         </form>
@@ -32,11 +32,11 @@
         {% endif %}
     </span>
     {% if not fc %}
-    <div class="mt-6 text-gray-400 text-lg">Enter a Friend Code to look up ban information.</div>
+    <div class="mt-8 text-gray-400 text-lg">Enter a Friend Code to look up ban information.</div>
     {% elif result %}
     <div class="mt-8">
         {% if result.error and result.error == "not_public" %}
-        <div class="text-red-400 text-lg font-semibold">Profile <b>{{ fc }}</b> is not public.</div>
+        <div class="text-red-400 text-lg font-semibold">The profile associated to "<b>{{ fc }}</b>" is not public, ban information cannot be displayed.</div>
         {% elif result.error %}
         <div class="text-red-400 text-lg font-semibold">No results found for <b>{{ fc }}</b>.</div>
         {% else %}

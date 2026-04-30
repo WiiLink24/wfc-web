@@ -21,3 +21,11 @@ oidc_client_secrets_json = {
     }
 }
 oidc_logout_url = ""
+
+# Moderator group UUID for access control
+moderator_group_uuid = "your-moderator-group-uuid-here"
+
+# API URLs for WFC and Ban Info
+wfc_stats_api = "http://localhost:8080/api/dummy_stats"
+wfc_groups_api = "https://api.wfc.wiilink.ca/api/groups"
+ban_info_api = "http://localhost:8080/api/dummy/baninfo?q={query}"

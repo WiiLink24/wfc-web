@@ -4,12 +4,11 @@ from flask_oidc import OpenIDConnect
 from flask_session import Session
 
 import config
-from routes.public import public_routes_bp
 from routes.auth import auth_routes_bp, set_oidc, get_logged_in_user_info
-from routes.misc import misc_routes_bp
 from routes.pages import pages_bp
 from routes.moderation import moderation_bp
 from routes.dummy import dummy_bp
+from urllib.parse import quote_plus
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = config.secret_key
@@ -36,17 +35,21 @@ set_oidc(oidc)
 app.register_blueprint(dummy_bp)
 
 
-
-# Inject user_info into all templates
 @app.context_processor
 def inject_user_info():
     return {'user_info': get_logged_in_user_info()}
 
 
+def _urlencode_filter(s):
+    try:
+        return quote_plus(s)
+    except Exception:
+        return ''
+
+app.jinja_env.filters['urlencode'] = _urlencode_filter
+
 # Register blueprints
-app.register_blueprint(public_routes_bp)
 app.register_blueprint(auth_routes_bp)
-app.register_blueprint(misc_routes_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(moderation_bp)
 
@@ -63,6 +66,19 @@ def handle_404(error):
             error_message="The page you're looking for doesn't exist.",
         ),
         404,
+    )
+    
+@app.errorhandler(401)
+def handle_401(error):
+    """Handle 401 Unauthorized errors"""
+    return (
+        render_template(
+            "errors/error.html",
+            error_code=401,
+            error_title="Unauthorized",
+            error_message="You are not authorized to access this page.",
+        ),
+        401,
     )
 
 

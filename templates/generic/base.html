@@ -19,7 +19,6 @@
             navigation: auto;
         }
 
-        /* Old page slides up and fades out */
         @keyframes slide-out-up {
             from {
                 opacity: 1;
@@ -32,7 +31,6 @@
             }
         }
 
-        /* New page slides in from below */
         @keyframes slide-in-up {
             from {
                 opacity: 0;
@@ -52,24 +50,11 @@
         ::view-transition-new(root) {
             animation: slide-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
-
-        /* Keep game cover/title transitions using their own crossfade */
-        ::view-transition-old(game-cover),
-        ::view-transition-new(game-cover),
-        ::view-transition-old(game-title),
-        ::view-transition-new(game-title) {
-            animation: none;
-        }
-
-        ::view-transition-old(sidebar),
-        ::view-transition-new(sidebar) {
-            animation: none;
-        }
     </style>
 </head>
 
 <body class="bg-gray-950 min-h-screen">
-    <div class="w-screen md:hidden fixed p-6 flex flex-row items-center justify-between z-30">
+    <div class="w-screen md:hidden fixed p-6 flex flex-row items-center justify-between z-30" style="view-transition-name: mobile-nav;">
         <img src="/static/img/logo.svg" alt="Logo" class="h-8" />
         <button id="mobileMenuBtn"
             class="p-2 bg-gray-950 rounded-lg text-white shadow-lg border border-gray-700 focus:outline-none">
@@ -147,6 +132,14 @@
                 </div>
                 {% endmacro %}
 
+                {% macro moderation_menu() %}
+                {% set mod_items = [
+                {'label': 'Titles Moderation', 'endpoint': 'moderation.titles_panel', 'icon': 'book-check'},
+                {'label': 'Ban/Kick Player', 'endpoint': 'moderation.titles_panel', 'icon': 'clock-alert'}
+                ] %}
+                {{ dropdown_menu('moderation', 'Moderation', 'gavel', mod_items) }}
+                {% endmacro %}
+
                 {% macro help_menu() %}
                 {% set help_items = [
                 {'label': 'Bans', 'endpoint': 'pages.ban_search', 'icon': 'gavel'},
@@ -199,8 +192,8 @@
                 {% endmacro %}
                 <span class="h-full sm:h-[calc(100%-80px)] flex flex-col justify-between">
                     <div class="flex flex-col gap-2">
-                        {{ menu_item('Search', 'misc_routes.search', 'search') }}
-                        {{ menu_item('Online Games', 'public_routes.index', 'globe') }}
+                        {{ menu_item('Search', 'pages.search', 'search') }}
+                        {{ menu_item('Online Games', 'pages.index', 'globe') }}
                         {{ menu_section('GET CONNECTED') }}
                         {{ menu_item('Installation Guide', 'pages.guide', 'book-open') }}
                         {{ menu_item('Launcher', 'pages.launcher', 'download') }}
@@ -208,8 +201,9 @@
                         {{ menu_item('Payload', 'pages.payload', 'box') }}
                     </div>
                     <span class="flex flex-col justify-end gap-2">
-                        {% if g.oidc_user.logged_in %}
-                        {{ menu_item('Moderation', 'moderation.titles_panel', 'gavel') }}
+                        {% if g.oidc_user.logged_in and '22e7145f-d132-48de-a779-7967208e3dd2' in g.oidc_user.groups %}
+                        {{ moderation_menu() }}
+                        <hr class="hidden md:block border-gray-800/50 my-1" />
                         {% endif %}
                         {{ help_menu() }}
                         {{ rules_terms_menu() }}
@@ -256,7 +250,7 @@
                 </a>
                 {% endif %}
                 {% if g.oidc_user.logged_in %}
-                <a href="{{ url_for('misc_routes.logout') }}"
+                <a href="{{ url_for('auth_routes.logout') }}"
                     class="hover:bg-red-600/30 p-2 rounded-xl flex items-center space-x-2 text-gray-400 hover:text-white transition-colors group mb-6">
                     <img src="/static/icon/log-out.svg" alt="Logout"
                         class="w-5 h-5 invert group-hover:translate-x-1 transition-transform duration-200" />

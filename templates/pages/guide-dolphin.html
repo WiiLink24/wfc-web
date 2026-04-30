@@ -3,10 +3,50 @@
 {% block title %}Dolphin Setup - WiiLink WFC{% endblock %}
 
 {% block content %}
-<div class="mb-12">
-    <h1 class="text-4xl font-bold text-white mb-4">Dolphin Setup Guide</h1>
-    <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-8 text-gray-300">
-        <p class="mb-4">Dolphin setup guide coming soon.</p>
-    </div>
+
+<div class="top-0 left-0 w-full h-full bg-center bg-cover animate-hue z-0 absolute" style="background-image: url('/static/img/bg.png');
+           view-transition-name: header-bg;
+           ">
+</div>
+
+{% set guide_steps = [
+  {
+    "icon": "search",
+    "name": "Get the code ready!",
+    "html": "<p>Navigate to the title you want to patch using the <strong>search box</strong> on this site, then <strong>download</strong> the corresponding .txt patch for your region and/or disc revision.</p>"
+  },
+  {
+    "icon": "info",
+    "name": "Dump your NAND!",
+    "html": "<div class='bg-gradient-to-r from-red-400 via-green-400 to-cyan-400 p-1 rounded-lg mb-3'><div class='bg-gray-900 rounded-md p-3'><p class='text-white text-sm mb-2'><strong>Notice for Retro Rewind users:</strong></p><p class='text-white/80 text-sm mb-0'>Retro Rewind runs their own WiiLink WFC instance separate from ours. No NAND backup is required to race! <a href='https://github.com/patchzyy/WheelWizard/releases' class='text-green-400 hover:text-green-300 underline'>Download the mod here</a></p></div></div><p>To use WiiLink WFC, you may need a NAND dump from a real Wii. Follow <a href='https://wii.hacks.guide/bootmii.html' class='text-green-400 hover:text-green-300 underline'>this guide</a> to dump your NAND, then install it on Dolphin by going to <strong>Tools → Manage NAND → Import BootMii NAND Backup...</strong></p>"
+  },
+  {
+    "icon": "gamepad",
+    "name": "Right click & Properties",
+    "html": "<p>Right-click the title you want to patch, then click on <strong>\"Properties\"</strong>.</p><img src='/static/img/guide/dolphin/1.png' alt='Step 1' class='w-full rounded-lg mt-3'>"
+  },
+  {
+    "icon": "code",
+    "name": "Gecko Codes",
+    "html": "<p>Click on <strong>\"Gecko Codes\"</strong>, then click <strong>\"Add new code\"</strong>.</p><img src='/static/img/guide/dolphin/2.png' alt='Step 2' class='w-full rounded-lg mt-3'>"
+  },
+  {
+    "icon": "circle-plus",
+    "name": "Paste & Save",
+    "html": "<p>Paste the code you want to use into the <strong>\"Code\"</strong> field, then save.</p><img src='/static/img/guide/dolphin/3.png' alt='Step 3' class='w-full rounded-lg mt-3'>"
+  },
+  {
+    "icon": "check-circle",
+    "name": "You're all set!",
+    "html": "<p>You are now connected to <strong>WiiLink WFC</strong>! Enjoy playing online with your friends.</p>"
+  }
+] %}
+{% set steps_json = guide_steps | tojson %}
+{% set carousel_id = 'guide-dolphin' %}
+<div class="top-1/2 -translate-y-1/2 flex flex-col items-center relative">
+    <img src="/static/img/guide/dolphin/dolphin.png" alt="Dolphin" class="w-24 mb-4" style="view-transition-name: title-img;">
+    <h1 class="mb-2 text-5xl font-bold text-white" style="view-transition-name: title;">Dolphin Installation Guide</h1>
+    <p class="text-gray-400 mb-8 text-center max-w-lg" style="view-transition-name: title-desc;">Step by step guide on how to install WWFC patches on Dolphin!</p>
+    {% include 'components/carousel.html' %}
 </div>
 {% endblock %}

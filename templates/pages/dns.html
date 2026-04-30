@@ -3,10 +3,76 @@
 {% block title %}DNS Server - WiiLink WFC{% endblock %}
 
 {% block content %}
-<div class="mb-12">
-    <h1 class="text-4xl font-bold text-white mb-4">DNS Server</h1>
-    <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-8 text-gray-300">
-        <p class="mb-4">DNS Server information coming soon.</p>
+<div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 absolute" style="background-image: url('/static/img/bg.png');
+           -webkit-mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           view-transition-name: header-bg;
+           ">
+</div>
+
+<div class="flex flex-col items-center relative max-w-3xl mx-auto px-4 py-16">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-white mb-3">WiiLink WFC DNS</h1>
+        <p class="text-gray-400 max-w-lg mx-auto">
+            Use this DNS to connect your Nintendo DS or Wii to WiiLink WFC.
+        </p>
+    </div>
+
+    <div class="w-full bg-gray-900/60 border border-gray-700 rounded-2xl p-8 mb-8 text-center">
+        <p class="text-gray-400 text-sm mb-3 uppercase tracking-wider font-medium">Primary DNS</p>
+        <div class="font-mono text-3xl sm:text-4xl text-white tracking-widest mb-2">
+            5.161.56.11
+        </div>
+        <p class="text-yellow-400/80 text-sm mt-3">
+            This is different from the main WiiLink DNS.
+        </p>
+    </div>
+
+    <div class="w-full grid sm:grid-cols-2 gap-4 mb-8">
+        <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-2">
+                <img src="/static/icon/badge-check.svg" alt="Compatible" class="w-4 h-4 invert">
+                <span class="text-white font-semibold text-sm">Nintendo DS</span>
+            </div>
+            <p class="text-gray-400 text-sm">Works with any DS game.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-2">
+                <img src="/static/icon/badge-check.svg" alt="Compatible" class="w-4 h-4 invert">
+                <span class="text-white font-semibold text-sm">Nintendo Wii</span>
+            </div>
+            <p class="text-gray-400 text-sm">Mario Kart Wii via disc channel only.</p>
+        </div>
+    </div>
+
+    <hr class="border-gray-700 w-full mt-8 mb-6">
+    <p class="text-white font-semibold text-lg mb-4">Troubleshooting</p>
+
+    <div class="w-full bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-3">
+            <img src="/static/icon/triangle-alert.svg" alt="Warning" class="w-5 h-5 invert mt-0.5 flex-shrink-0">
+            <div>
+                <h3 class="text-white font-semibold text-sm mb-1">Error Code 60000</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    If you see this error, the game wasn't launched under the correct IOS version. Launch Mario Kart Wii from the disc channel.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full bg-red-500/5 border border-red-500/20 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+            <img src="/static/icon/shield-alert.svg" alt="Security" class="w-5 h-5 invert mt-0.5 flex-shrink-0">
+            <div>
+                <h3 class="text-white font-semibold text-sm mb-2">Security Disclaimer</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-2">
+                    This method is an exploit and inherently not secure. Our DNS server impersonates original services and remotely executes unsigned code on your console.
+                </p>
+                <p class="text-gray-400 text-sm leading-relaxed mb-2">
+                    While our code is safe, hostile actors could theoretically exploit the same flaws. Consider using the <a href="/launcher" class="text-green-400 hover:text-green-300 underline">launcher</a> for a secure alternative.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

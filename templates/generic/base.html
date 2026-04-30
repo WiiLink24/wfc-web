@@ -50,6 +50,20 @@
         ::view-transition-new(root) {
             animation: slide-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
+
+        .animate-hue {
+            animation: hue-rotate 20s linear infinite;
+        }
+
+        @keyframes hue-rotate {
+            from {
+                filter: hue-rotate(0deg);
+            }
+
+            to {
+                filter: hue-rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -80,7 +94,7 @@
                 {% macro menu_item(name, redirect_func, icon_name) %}
                 <a href="{{ url_for(redirect_func) }}"
                     class="block w-full px-4 py-2 {% if request.view_args and url_for(request.endpoint, **request.view_args).startswith(url_for(redirect_func)) %}bg-indigo-600 {% else %}bg-gray-900/85 hover:bg-gray-900/95{% endif %} text-white rounded-xl transition duration-200 flex items-center">
-                    <img src="/static/icon/{{ icon_name }}.svg" alt="{{ name }}" class="w-5 h-5 invert mr-2" />{{ name
+                    <img src="/static/icon/{{ icon_name }}.svg" alt="{{ name }}" class="w-5 h-5 invert mr-2" style="filter: invert(1) brightness(10000000000000000000000);" />{{ name
                     }}
                 </a>
                 {% if request.view_args and url_for(request.endpoint,
@@ -96,11 +110,11 @@
                 <a href="{{ redirect_func }}" target="_blank"
                     class="block w-full px-4 py-2 bg-gray-900/85 hover:bg-gray-900/95 text-white rounded-xl transition duration-200 flex items-center justify-between">
                     <span class="flex items-center">
-                        <img src="/static/icon/{{ icon_name }}.svg" alt="{{ name }}" class="w-5 h-5 invert mr-2" />{{
+                        <img src="/static/icon/{{ icon_name }}.svg" alt="{{ name }}" class="w-5 h-5 invert mr-2" style="filter: invert(1) brightness(10000000000000000000000);" />{{
                         name
                         }}
                     </span>
-                    <img src="/static/icon/external-link.svg" alt="External Link" class="w-4 h-4 invert" />
+                    <img src="/static/icon/external-link.svg" alt="External Link" class="ml-6 w-4 h-4 invert" />
                 </a>
                 {% endmacro %}
 
@@ -116,7 +130,7 @@
                     <button id="{{ section_id }}Btn"
                         class="w-full px-4 py-2 bg-gray-900/85 hover:bg-gray-900/95 text-white rounded-xl transition duration-200 flex items-center justify-between">
                         <span class="flex items-center">
-                            <img src="/static/icon/{{ icon }}.svg" alt="{{ label }}" class="w-5 h-5 invert mr-2" />
+                            <img src="/static/icon/{{ icon }}.svg" alt="{{ label }}" class="w-5 h-5 invert mr-2" style="filter: invert(1) brightness(10000000000000000000000);" />
                             {{ label }}
                         </span>
                         <span id="{{ section_id }}Arrow" class="transform"><img src="/static/icon/chevron-right.svg"
@@ -124,7 +138,7 @@
                     </button>
                     <div id="{{ section_id }}Menu"
                         class="flex flex-col absolute left-full top-0 -ml-4 bg-gray-950 backdrop-blur-md border border-gray-800 rounded-2xl shadow-xl gap-2 p-2 z-40 pointer-events-none opacity-0 transition-opacity duration-200 min-w-max"
-                        style="visibility: hidden;">
+                        style="visibility: hidden; min-width:200px; width: 100%;">
                         {% for item in items %}
                         {{ menu_item(item.label, item.endpoint, item.icon) }}
                         {% endfor %}
@@ -190,12 +204,21 @@
                     {% endfor %}
                 </div>
                 {% endmacro %}
+
+                {% macro installation_menu() %}
+                {% set install_items = [
+                {'label': 'Dolphin', 'endpoint': 'pages.guide_dolphin', 'icon': 'dolphin'},
+                {'label': 'Console', 'endpoint': 'pages.guide', 'icon': 'gamepad'}
+                ] %}
+                {{ dropdown_menu('installation', 'Installation Guide', 'book-open', install_items) }}
+                {% endmacro %}
+
                 <span class="h-full sm:h-[calc(100%-80px)] flex flex-col justify-between">
                     <div class="flex flex-col gap-2">
                         {{ menu_item('Search', 'pages.search', 'search') }}
                         {{ menu_item('Online Games', 'pages.index', 'globe') }}
                         {{ menu_section('GET CONNECTED') }}
-                        {{ menu_item('Installation Guide', 'pages.guide', 'book-open') }}
+                        {{ installation_menu() }}
                         {{ menu_item('Launcher', 'pages.launcher', 'download') }}
                         {{ menu_item('DNS Server', 'pages.dns', 'server') }}
                         {{ menu_item('Payload', 'pages.payload', 'box') }}

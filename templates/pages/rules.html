@@ -3,10 +3,100 @@
 {% block title %}Rules - WiiLink WFC{% endblock %}
 
 {% block content %}
-<div class="mb-12">
-    <h1 class="text-4xl font-bold text-white mb-4">WiiLink WFC Rules</h1>
-    <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-8 text-gray-300">
-        <p class="mb-4">Rules coming soon.</p>
+<div class="top-0 left-0 w-full h-96 bg-center bg-cover animate-hue z-0 absolute" style="background-image: url('/static/img/bg.png');
+           -webkit-mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           mask-image: linear-gradient(to bottom, black 60%, rgba(0,0,0,0.3) 80%, transparent 100%);
+           view-transition-name: header-bg;
+           ">
+</div>
+
+<div class="my-12 top-1/2 -translate-y-1/2 flex flex-col items-center relative max-w-3xl mx-auto px-4">
+    <img src="/static/img/logo_wl.png" alt="WiiLink" class="h-16 mb-4">
+    <h1 class="mb-2 text-4xl sm:text-5xl font-bold text-white text-center leading-tight">
+        WiiLink's commitment to fun, fairness and safety.
+    </h1>
+    <p class="text-gray-400 mb-12 text-center max-w-xl">
+        At WiiLink, we strive to offer the best experience possible, and that includes how people interact on our service. These are the rules you, the user, are expected to follow.
+    </p>
+
+    <div class="w-full text-left space-y-10">
+        <section>
+            <h2 class="text-2xl font-bold text-white mb-5">Fun</h2>
+            <div class="space-y-4">
+                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                        <img src="/static/icon/triangle-alert.svg" alt="Fun" class="w-5 h-5 invert">
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Games should be fun for everyone. Don't ruin the experience for others. This includes, but is not limited to, cheating, hacking, or using exploits.
+                    </p>
+                </div>
+                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                        <img src="/static/icon/circle-x.svg" alt="Ban" class="w-5 h-5 invert">
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Don't use offensive language or harass other players. This includes, but is not limited to, racism, sexism, homophobia, or any other form of discrimination.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-white mb-5">Fairness</h2>
+            <div class="space-y-4">
+                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                        <img src="/static/icon/gavel.svg" alt="Fairness" class="w-5 h-5 invert">
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Don't use cheats, hacks, or exploits. This includes, but is not limited to, using codes that give you an unfair advantage, or using codes that make the game unplayable for others.
+                    </p>
+                </div>
+                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                        <img src="/static/icon/users.svg" alt="Accounts" class="w-5 h-5 invert">
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Don't use multiple accounts to gain an unfair advantage.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-white mb-5">Safety</h2>
+            <div class="space-y-4">
+                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                        <img src="/static/icon/shield.svg" alt="Safety" class="w-5 h-5 invert">
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Don't share personal information. This includes, but is not limited to, your real name, address, phone number, or any other information that could be used to identify you.
+                    </p>
+                </div>
+                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                        <img src="/static/icon/shield-alert.svg" alt="Content" class="w-5 h-5 invert">
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Don't share inappropriate content. This includes, but is not limited to explicit images, videos, or links to explicit content in any way, shape, or form.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="w-full mt-10 space-y-4">
+        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-5 text-center">
+            <p class="text-red-300 text-sm">
+                By using WiiLink WFC, you agree to follow these rules. If you don't, you may be banned, temporarily or permanently, from using our service.
+            </p>
+        </div>
+        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-5 text-center flex items-center justify-center gap-2">
+            <img src="/static/icon/badge-check.svg" alt="Check" class="w-5 h-5 invert">
+            <p class="text-green-300 text-sm">We hope you enjoy playing on WiiLink WFC!</p>
+        </div>
     </div>
 </div>
 {% endblock %}

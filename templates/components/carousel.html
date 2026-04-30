@@ -1,12 +1,75 @@
-<div class="max-w-2xl mx-auto my-8 px-4">
+<div class="max-w-2xl w-full mx-auto my-8 px-4">
+    <style>
+        @keyframes carousel-slide-out-left {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(-40px); }
+        }
+        @keyframes carousel-slide-in-right {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes carousel-slide-out-right {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(40px); }
+        }
+        @keyframes carousel-slide-in-left {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes carousel-fade-out {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes carousel-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        html.carousel-vt ::view-transition-old(root) {
+            animation: carousel-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        html.carousel-vt ::view-transition-new(root) {
+            animation: carousel-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        html.carousel-vt ::view-transition-old(carousel-card-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-new(carousel-card-{{ carousel_id }}) {
+            animation: none;
+        }
+
+        html.carousel-vt ::view-transition-old(carousel-prev-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-new(carousel-prev-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-old(carousel-next-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-new(carousel-next-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-old(carousel-label-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-new(carousel-label-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-old(carousel-dots-{{ carousel_id }}),
+        html.carousel-vt ::view-transition-new(carousel-dots-{{ carousel_id }}) {
+            animation: none;
+        }
+
+        html.vt-dir-next ::view-transition-old(carousel-content-{{ carousel_id }}) {
+            animation: carousel-slide-out-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        html.vt-dir-next ::view-transition-new(carousel-content-{{ carousel_id }}) {
+            animation: carousel-slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        html.vt-dir-prev ::view-transition-old(carousel-content-{{ carousel_id }}) {
+            animation: carousel-slide-out-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        html.vt-dir-prev ::view-transition-new(carousel-content-{{ carousel_id }}) {
+            animation: carousel-slide-in-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+    </style>
     <script id="{{ carousel_id }}-steps" type="application/json">
     {{ steps_json|safe }}
-  </script>
+    </script>
     <div>
-        <p id="{{ carousel_id }}-step-label" class="text-xs text-white mb-2"></p>
-        <div id="{{ carousel_id }}-card" class="bg-white/5 border border-white/10 rounded-xl p-7 min-h-52"></div>
+        <p id="{{ carousel_id }}-step-label" style="view-transition-name: carousel-label-{{ carousel_id }}" class="text-xs text-white mb-2"></p>
+        <div id="{{ carousel_id }}-card" style="view-transition-name: carousel-card-{{ carousel_id }}" class="w-full bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl p-7 min-h-52"></div>
         <div class="flex items-center justify-between mt-5">
-            <button id="{{ carousel_id }}-prev"
+            <button id="{{ carousel_id }}-prev" style="view-transition-name: carousel-prev-{{ carousel_id }}"
                 class="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -14,8 +77,8 @@
                 </svg>
                 Back
             </button>
-            <div id="{{ carousel_id }}-dots" class="flex items-center gap-2"></div>
-            <button id="{{ carousel_id }}-next"
+            <div id="{{ carousel_id }}-dots" style="view-transition-name: carousel-dots-{{ carousel_id }}" class="flex items-center gap-2"></div>
+            <button id="{{ carousel_id }}-next" style="view-transition-name: carousel-next-{{ carousel_id }}"
                 class="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
                 Next
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -35,29 +98,54 @@
         const label = document.getElementById('{{ carousel_id }}-step-label');
         const btnPrev = document.getElementById('{{ carousel_id }}-prev');
         const btnNext = document.getElementById('{{ carousel_id }}-next');
-        function render() {
+        function render(useTransition, direction) {
             const s = steps[current];
-            card.innerHTML = `\n      <div class=\"w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-2xl mb-4\"><img src=\"/static/icon/${s.icon}.svg\" alt=\"${s.name}\" class=\"w-8 h-8\"></div>\n      <h2 class=\"text-lg font-semibold text-white mb-3\">${s.name}</h2>\n      <div class=\"text-sm text-white/80 leading-relaxed space-y-1\">${s.html}</div>\n    `;
-            label.textContent = `Step ${current + 1} of ${steps.length}`;
-            btnPrev.disabled = current === 0;
-            btnNext.disabled = current === steps.length - 1;
-            dotsEl.innerHTML = '';
-            steps.forEach(function (_, i) {
-                const d = document.createElement('div');
-                if (i === current) {
-                    d.className = 'w-6 h-2 rounded-full bg-white cursor-pointer transition-all duration-200';
-                } else if (i < current) {
-                    d.className = 'w-2 h-2 rounded-full bg-green-500 cursor-pointer transition-all duration-200';
-                } else {
-                    d.className = 'w-2 h-2 rounded-full border-2 border-white/30 cursor-pointer transition-all duration-200';
+            function applyUpdate() {
+                card.innerHTML = `
+      <div style="view-transition-name: carousel-content-{{ carousel_id }}">
+        <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-2xl mb-4"><img src="/static/icon/${s.icon}.svg" alt="${s.name}" class="w-8 h-8"></div>
+        <h2 class="text-lg font-semibold text-white mb-3">${s.name}</h2>
+        <div class="text-sm text-white/80 leading-relaxed space-y-1">${s.html}</div>
+      </div>
+    `;
+                label.textContent = `Step ${current + 1} of ${steps.length}`;
+                btnPrev.disabled = current === 0;
+                btnNext.disabled = current === steps.length - 1;
+                dotsEl.innerHTML = '';
+                steps.forEach(function (_, i) {
+                    const d = document.createElement('div');
+                    if (i === current) {
+                        d.className = 'w-6 h-2 rounded-full bg-white cursor-pointer transition-all duration-200';
+                    } else if (i < current) {
+                        d.className = 'w-2 h-2 rounded-full bg-green-500 cursor-pointer transition-all duration-200';
+                    } else {
+                        d.className = 'w-2 h-2 rounded-full border-2 border-white/30 cursor-pointer transition-all duration-200';
+                    }
+                    d.title = steps[i].name;
+                    d.addEventListener('click', function () {
+                        if (i === current) return;
+                        const dir = i > current ? 'next' : 'prev';
+                        current = i;
+                        render(true, dir);
+                    });
+                    dotsEl.appendChild(d);
+                });
+            }
+            if (useTransition && document.startViewTransition) {
+                document.documentElement.classList.add('carousel-vt');
+                if (direction) {
+                    document.documentElement.classList.add(direction === 'next' ? 'vt-dir-next' : 'vt-dir-prev');
                 }
-                d.title = steps[i].name;
-                d.addEventListener('click', function () { current = i; render(); });
-                dotsEl.appendChild(d);
-            });
+                const transition = document.startViewTransition(applyUpdate);
+                transition.finished.then(function () {
+                    document.documentElement.classList.remove('carousel-vt', 'vt-dir-next', 'vt-dir-prev');
+                });
+            } else {
+                applyUpdate();
+            }
         }
-        btnPrev.addEventListener('click', function () { if (current > 0) { current--; render(); } });
-        btnNext.addEventListener('click', function () { if (current < steps.length - 1) { current++; render(); } });
-        render();
+        btnPrev.addEventListener('click', function () { if (current > 0) { current--; render(true, 'prev'); } });
+        btnNext.addEventListener('click', function () { if (current < steps.length - 1) { current++; render(true, 'next'); } });
+        render(false);
     })();
 </script>

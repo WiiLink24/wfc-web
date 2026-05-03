@@ -157,7 +157,8 @@
                 {% macro help_menu() %}
                 {% set help_items = [
                 {'label': 'Bans', 'endpoint': 'pages.ban_search', 'icon': 'gavel'},
-                {'label': 'Error Code Lookup', 'endpoint': 'pages.error_search', 'icon': 'search-x'}
+                {'label': 'Error Code Lookup', 'endpoint': 'pages.error_search', 'icon': 'search-x'},
+                {'label': 'Payload', 'endpoint': 'pages.payload', 'icon': 'box'}
                 ] %}
                 {{ dropdown_menu('help', 'Help', 'badge-question-mark', help_items) }}
                 {% endmacro %}
@@ -221,7 +222,6 @@
                         {{ installation_menu() }}
                         {{ menu_item('Launcher', 'pages.launcher', 'download') }}
                         {{ menu_item('DNS Server', 'pages.dns', 'server') }}
-                        {{ menu_item('Payload', 'pages.payload', 'box') }}
                     </div>
                     <span class="flex flex-col justify-end gap-2">
                         {% if g.oidc_user.logged_in and '22e7145f-d132-48de-a779-7967208e3dd2' in g.oidc_user.groups %}

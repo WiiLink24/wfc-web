@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, g
 from flask_oidc import OpenIDConnect
 from flask_session import Session
+import markdown as md
 
 import config
 from routes.auth import auth_routes_bp, set_oidc, get_logged_in_user_info
@@ -46,7 +47,16 @@ def _urlencode_filter(s):
     except Exception:
         return ''
 
+
+def _markdown_filter(s):
+    try:
+        return md.markdown(s, extensions=["nl2br"])
+    except Exception:
+        return s
+
+
 app.jinja_env.filters['urlencode'] = _urlencode_filter
+app.jinja_env.filters['markdown'] = _markdown_filter
 
 # Register blueprints
 app.register_blueprint(auth_routes_bp)

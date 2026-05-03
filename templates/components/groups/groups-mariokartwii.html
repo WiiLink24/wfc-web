@@ -1,3 +1,15 @@
+<style>
+@font-face {
+  font-family: 'MiiFont';
+  src: url('/static/fonts/miifont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+.font-mii {
+  font-family: 'MiiFont', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+</style>
 <div id="mkw_special_container" class="space-y-6 w-full">
     {% for group in groups_data %}
     {% set rk = (group.rk or '')[:2] %}
@@ -22,39 +34,37 @@
 
     {% set host_name = 'Awaiting host...' %}
     {% if group.host is not none and group.host != '' %}
-    {% set host_idx = group.host|int(default=-1) %}
-    {% if host_idx >= 0 and host_idx < (group.players|length) %} {% set host_name="<span class='font-regular'><b>" ~
-        group.players[host_idx].name ~ "</b>'s room</span>" %} {% endif %} {% endif %} <div
-        class="rounded-2xl bg-gray-900/40 p-4">
+    {% if group.host in group.players %}
+    {% set host_player = group.players[group.host] %}
+    {% set host_name="<span class='font-regular'><b>" ~
+        host_player.name ~ "</b>'s room</span>" %}
+    {% endif %}
+    {% endif %}
+    <div class="rounded-2xl bg-gray-900/40 p-4">
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
-                <div class="text-white font-semibold text-lg">{{ host_name|safe }}</div>
+                <div class="text-white font-semibold text-lg font-mii">{{ host_name|safe }}</div>
                 <div class="text-sm text-gray-400">ID: <span class="font-mono">{{ group.id }}</span> {% if group.created
                     %}• {{ group.created }}{% endif %}</div>
             </div>
             <div class="flex items-center gap-2">
                 <span class="px-3 py-1 text-sm rounded-full text-white {{ rk_color }}">{{ rk_label }}</span>
                 <span class="px-3 py-1 text-sm rounded-full text-white {{ suspend_color }}">{{ suspend_label }}</span>
-                <span class="px-3 py-1 text-sm rounded-full text-white bg-gray-700">{{ group.type }}</span>
+                <span class="px-3 py-1 text-sm rounded-full text-white bg-gray-700 capitalize">{{ group.type }}</span>
             </div>
         </div>
 
         <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
-            {% for player in group.players %}
+            {% for player in group.players.values() %}
             <div class="flex items-center justify-between gap-4 p-3 rounded-xl bg-gray-900">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="flex gap-1 z-0 relative">
                         {% for mii in player.mii %}
-                        {% set _mii_raw = mii.mii %}
-                        {% if _mii_raw is string %}
-                        {% set _mii_payload = _mii_raw %}
-                        {% else %}
-                        {% set _mii_payload = _mii_raw.hex() %}
-                        {% endif %}
+                        {% set _mii_raw = mii.data %}
                         <div class="w-14 h-14 rounded-lg bg-gray-800 flex items-center justify-center text-xs text-gray-300 {% if not loop.first %}translate-x-12 scale-75 opacity-60 z-0 absolute{% else %}z-10{% endif %}"
-                            style="{% if not loop.first %}margin-left:-24px;{% endif %}">
-                            <img src="https://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data={{ _mii_payload | urlencode }}"
-                                alt="{{ mii.name }}'s Mii" class="w-full h-full object-cover">
+                            style="{% if not loop.first %}margin-left:-24px;{% endif %} background-image: url('/static/img/loading.gif'); background-size: 20px; background-position: center; background-repeat: no-repeat;">
+                            <img data-mii-base64="{{ _mii_raw }}"
+                                class="w-full h-full object-cover opacity-0 transition-opacity duration-500 js-render-mii">
                         </div>
                         {% endfor %}
                     </div>
@@ -65,7 +75,7 @@
                         {% else %}
                         {% set display_name = player.mii[0].name %}
                         {% endif %}
-                        <div class="text-sm font-semibold text-white truncate">{{ display_name }}</div>
+                        <div class="text-sm font-semibold text-white truncate font-mii">{{ display_name }}</div>
                         <div class="text-sm text-gray-400 truncate">{{ player.fc }}</div>
                     </div>
                 </div>
@@ -80,7 +90,7 @@
                         <span class="px-2 py-0.5 text-xs rounded bg-green-700 text-white">BR</span>
                     </div>
                     {% if player.pid %}
-                    <div class="text-xs text-gray-500 mt-2">PID: <span class="font-mono">{{ player.pid }}</span></div>
+                    <div class="text-right text-[10px] text-gray-500 mt-2">PID: <span class="font-mono">{{ player.pid }}</span></div>
                     {% endif %}
                 </div>
             </div>
@@ -88,4 +98,57 @@
         </div>
 </div>
 {% endfor %}
+<script>
+(function() {
+  function renderMiiImages() {
+    document.querySelectorAll('img[data-mii-base64]').forEach(function(img) {
+      var base64String = img.dataset.miiBase64;
+      if (!base64String) return;
+
+      var binaryString = atob(base64String);
+      var bytes = new Uint8Array(binaryString.length);
+      for (var i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      var blob = new Blob([bytes], { type: "application/octet-stream" });
+      var formData = new FormData();
+      formData.append("platform", "wii");
+      formData.append("data", blob, "file.miigx");
+
+      fetch("https://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi", {
+        method: "POST",
+        body: formData,
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        if (data.mii) {
+          img.src = "https://studio.mii.nintendo.com/miis/image.png?data=" + encodeURIComponent(data.mii) + "&type=face_only&expression=normal&width=270&bgColor=FFFFFF00";
+          img.classList.remove('opacity-0');
+        }
+      })
+      .catch(function(err) {
+        console.error("Mii render failed", err);
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMiiImages);
+  } else {
+    renderMiiImages();
+  }
+
+  var scrollKey = 'mkw_scroll_pos';
+  var savedScroll = localStorage.getItem(scrollKey);
+  if (savedScroll !== null) {
+    window.scrollTo(0, parseInt(savedScroll, 10));
+    localStorage.removeItem(scrollKey);
+  }
+
+  setInterval(function() {
+    localStorage.setItem(scrollKey, window.scrollY);
+    location.reload();
+  }, 30000);
+})();
+</script>
 </div>

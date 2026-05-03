@@ -4,3 +4,4 @@ flask_oidc
 psycopg2-binary
 black
 apscheduler
+markdown

@@ -80,7 +80,7 @@
             <div class='w-full flex items-center px-4 py-2 bg-gray-800 rounded-lg text-2xl font-bold text-white'>
                 Error <span class='ml-2 text-blue-400'>{{ errorInfo.name }}</span>
             </div>
-            <div class='px-4 py-2 text-lg text-white mb-2'>{{ errorInfo.info }}</div>
+            <div class='px-4 py-2 text-white mb-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_a]:text-green-400 [&_a:hover]:text-green-300 [&_a]:underline [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_h4]:font-bold'>{{ errorInfo.info | markdown | safe }}</div>
         </div>
         {% endif %}
         {% endif %}

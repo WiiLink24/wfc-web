@@ -8,7 +8,46 @@
            ">
 </div>
 
-{% set guide_steps = [
+
+{% set gecko_steps = [
+  {
+    "icon": "search",
+    "name": "Get the code ready!",
+    "html": "<p>Navigate to the title you want to patch using the search box on this site and download the corresponding <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>.gct</code> patch file depending on your region.</p>"
+  },
+  {
+    "icon": "download",
+    "name": "Download the software!",
+    "html": "<p>Download the Gecko homebrew application from the <a href=\"https://oscwii.org/library/app/Gecko\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-blue-500 hover:text-blue-600 underline\">Open Shop Channel</a> and install it on your Wii.</p>"
+  },
+  {
+    "icon": "folder",
+    "name": "Organize the patch file",
+    "html": "<p>Place the Gecko code file in a <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>codes</code> folder on the root of your SD Card. Create the folder if it doesn't exist.</p>"
+  },
+  {
+    "icon": "house",
+    "name": "Launch Gecko OS",
+    "html": "<p>Insert your SD card into your Wii and launch Gecko OS from the Homebrew Channel.</p>"
+  },
+  {
+    "icon": "gamepad",
+    "name": "Launch the game",
+    "html": "<p>Select \"Launch Game\" with the game you want to play inside the disc drive. Gecko will apply the patch automatically.</p>"
+  },
+  {
+    "icon": "check-circle",
+    "name": "You're all set!",
+    "html": "<p>You're now connected to <strong>WiiLink WFC</strong>. If you need help, visit <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>#wfc-support</code> on our Discord.</p>"
+  }
+] %}
+
+{% set disc_steps = [
+  {
+    "icon": "help-circle",
+    "name": "How are you playing your game?",
+    "html": "<p class=\"text-center mb-4 font-semibold text-lg\">Choose your installation method:</p><div class=\"flex flex-col sm:flex-row gap-3 justify-center\"><button id=\"method-disc\" class=\"flex-1 max-w-xs flex items-center justify-center gap-3 px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition duration-200 font-semibold\"><img src=\"/static/icon/disc.svg\" alt=\"Game Disc\" class=\"w-5 h-5 invert\" />Game Disc</button><button id=\"method-usb\" class=\"flex-1 max-w-xs flex items-center justify-center gap-3 px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition duration-200 font-semibold\"><img src=\"/static/icon/usb.svg\" alt=\"USB Loader\" class=\"w-5 h-5 invert\" />USB Loader</button></div>"
+  },
   {
     "icon": "globe",
     "name": "Connect to the internet",
@@ -35,11 +74,93 @@
     "html": "<p>You're now connected to <strong>WiiLink WFC</strong>. If you need help, visit <code class='bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm'>#wfc-support</code> on our Discord.</p>"
   }
 ] %}
-{% set steps_json = guide_steps | tojson %}
+
+{% set usb_steps = [
+  {
+    "icon": "help-circle",
+    "name": "How are you playing your game?",
+    "html": "<p class=\"text-center mb-4 font-semibold text-lg\">Choose your installation method:</p><div class=\"flex flex-col sm:flex-row gap-3 justify-center\"><button id=\"method-disc\" class=\"flex-1 max-w-xs flex items-center justify-center gap-3 px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition duration-200 font-semibold\"><img src=\"/static/icon/disc.svg\" alt=\"Game Disc\" class=\"w-5 h-5 invert\" />Game Disc</button><button id=\"method-usb\" class=\"flex-1 max-w-xs flex items-center justify-center gap-3 px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition duration-200 font-semibold\"><img src=\"/static/icon/usb.svg\" alt=\"USB Loader\" class=\"w-5 h-5 invert\" />USB Loader</button></div>"
+  }
+] + gecko_steps %}
+
+{% set steps_json = disc_steps | tojson %}
 {% set carousel_id = 'guide' %}
+
 <div class="top-1/2 -translate-y-1/2 flex flex-col items-center relative">
-    <h1 class="mb-2 text-5xl font-bold text-white" style="view-transition-name: title;">Installation Guide</h1>
-    <p class="text-gray-400 mb-8 text-center max-w-lg" style="view-transition-name: title-desc;">We will get you up and running in no time!</p>
+    <h1 class="mb-8 text-5xl font-bold text-white" style="view-transition-name: title;">Installation Guide</h1>
+    
+    <div id="carousel-container" class="w-full">
+        <p class="text-gray-400 mb-8 text-center max-w-lg" style="view-transition-name: title-desc;">We will get you up and running in no time!</p>
     {% include 'components/carousel.html' %}
+    </div>
 </div>
+
+<script>
+    const discSteps = {{ disc_steps | tojson | safe }};
+    const usbSteps = {{ usb_steps | tojson | safe }};
+    
+    function renderCarousel(steps, startStep = 0) {
+        const container = document.getElementById('carousel-container');
+        let current = startStep;
+        
+        function renderStep() {
+            const step = steps[current];
+            const card = document.getElementById('guide-card');
+            const label = document.getElementById('guide-step-label');
+            const btnPrev = document.getElementById('guide-prev');
+            const btnNext = document.getElementById('guide-next');
+            const dotsEl = document.getElementById('guide-dots');
+            
+            label.textContent = `Step ${current + 1} of ${steps.length}`;
+            card.innerHTML = `
+                <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-2xl mb-4"><img src="/static/icon/${step.icon}.svg" alt="${step.name}" class="w-8 h-8"></div>
+                <h2 class="text-lg font-semibold text-white mb-3">${step.name}</h2>
+                <div class="text-sm text-white/80 leading-relaxed">${step.html}</div>
+            `;
+            
+            btnPrev.disabled = current === 0;
+            btnNext.disabled = current === steps.length - 1;
+            
+            dotsEl.innerHTML = '';
+            steps.forEach((_, i) => {
+                const dot = document.createElement('div');
+                if (i === current) {
+                    dot.className = 'w-6 h-2 rounded-full bg-white cursor-pointer';
+                } else if (i < current) {
+                    dot.className = 'w-2 h-2 rounded-full bg-green-500 cursor-pointer';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full border-2 border-white/30 cursor-pointer';
+                }
+                dot.addEventListener('click', () => { current = i; renderStep(); });
+                dotsEl.appendChild(dot);
+            });
+            
+            // Attach button listeners after rendering
+            if (current === 0) {
+                const discBtn = document.getElementById('method-disc');
+                const usbBtn = document.getElementById('method-usb');
+                if (discBtn) discBtn.addEventListener('click', (e) => { e.preventDefault(); switchMethod('disc'); });
+                if (usbBtn) usbBtn.addEventListener('click', (e) => { e.preventDefault(); switchMethod('usb'); });
+            }
+        }
+        
+        document.getElementById('guide-prev').addEventListener('click', () => { if (current > 0) { current--; renderStep(); } });
+        document.getElementById('guide-next').addEventListener('click', () => { if (current < steps.length - 1) { current++; renderStep(); } });
+        
+        renderStep();
+    }
+    
+    function switchMethod(method) {
+        if (method === 'disc') {
+            renderCarousel(discSteps, 1);
+        } else if (method === 'usb') {
+            renderCarousel(usbSteps, 1);
+        }
+    }
+    
+    window.addEventListener('load', () => {
+        renderCarousel(discSteps, 0);
+    });
+</script>
+
 {% endblock %}

@@ -89,50 +89,146 @@
 <div class="top-1/2 -translate-y-1/2 flex flex-col items-center relative">
     <h1 class="mb-8 text-5xl font-bold text-white" style="view-transition-name: title;">Installation Guide</h1>
     
-    <div id="carousel-container" class="w-full">
-        <p class="text-gray-400 mb-8 text-center max-w-lg" style="view-transition-name: title-desc;">We will get you up and running in no time!</p>
-    {% include 'components/carousel.html' %}
+    <p class="text-gray-400 mb-8 text-center max-w-lg" style="view-transition-name: title-desc;">We will get you up and running in no time!</p>
+    
+    <div class="max-w-2xl w-full mx-auto my-8 px-4">
+        <style>
+            @keyframes carousel-slide-out-left {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(-40px); }
+            }
+            @keyframes carousel-slide-in-right {
+                from { opacity: 0; transform: translateX(60px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            @keyframes carousel-slide-out-right {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(40px); }
+            }
+            @keyframes carousel-slide-in-left {
+                from { opacity: 0; transform: translateX(-60px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            @keyframes carousel-fade-out {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            @keyframes carousel-fade-in {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            html.carousel-vt ::view-transition-old(root) {
+                animation: carousel-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+            html.carousel-vt ::view-transition-new(root) {
+                animation: carousel-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+
+            html.carousel-vt ::view-transition-old(carousel-card-guide),
+            html.carousel-vt ::view-transition-new(carousel-card-guide) {
+                animation: none;
+            }
+
+            html.carousel-vt ::view-transition-old(carousel-prev-guide),
+            html.carousel-vt ::view-transition-new(carousel-prev-guide),
+            html.carousel-vt ::view-transition-old(carousel-next-guide),
+            html.carousel-vt ::view-transition-new(carousel-next-guide),
+            html.carousel-vt ::view-transition-old(carousel-label-guide),
+            html.carousel-vt ::view-transition-new(carousel-label-guide),
+            html.carousel-vt ::view-transition-old(carousel-dots-guide),
+            html.carousel-vt ::view-transition-new(carousel-dots-guide) {
+                animation: none;
+            }
+
+            html.vt-dir-next ::view-transition-old(carousel-content-guide) {
+                animation: carousel-slide-out-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+            html.vt-dir-next ::view-transition-new(carousel-content-guide) {
+                animation: carousel-slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+
+            html.vt-dir-prev ::view-transition-old(carousel-content-guide) {
+                animation: carousel-slide-out-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+            html.vt-dir-prev ::view-transition-new(carousel-content-guide) {
+                animation: carousel-slide-in-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+            }
+        </style>
+        
+        <div>
+            <p id="guide-step-label" style="view-transition-name: carousel-label-guide" class="text-xs text-white mb-2"></p>
+            <div id="guide-card" style="view-transition-name: carousel-card-guide" class="w-full bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl p-7 min-h-52"></div>
+            <div class="flex items-center justify-between mt-5">
+                <button id="guide-prev" style="view-transition-name: carousel-prev-guide"
+                    class="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Back
+                </button>
+                <div id="guide-dots" style="view-transition-name: carousel-dots-guide" class="flex items-center gap-2"></div>
+                <button id="guide-next" style="view-transition-name: carousel-next-guide"
+                    class="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+                    Next
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     const discSteps = {{ disc_steps | tojson | safe }};
     const usbSteps = {{ usb_steps | tojson | safe }};
+    const geckoSteps = {{ gecko_steps | tojson | safe }};
     
-    function renderCarousel(steps, startStep = 0) {
-        const container = document.getElementById('carousel-container');
-        let current = startStep;
+    let currentSteps = discSteps;
+    let current = 0;
+    
+    const card = document.getElementById('guide-card');
+    const label = document.getElementById('guide-step-label');
+    const btnPrev = document.getElementById('guide-prev');
+    const btnNext = document.getElementById('guide-next');
+    const dotsEl = document.getElementById('guide-dots');
+    
+    function render(useTransition, direction) {
+        const step = currentSteps[current];
         
-        function renderStep() {
-            const step = steps[current];
-            const card = document.getElementById('guide-card');
-            const label = document.getElementById('guide-step-label');
-            const btnPrev = document.getElementById('guide-prev');
-            const btnNext = document.getElementById('guide-next');
-            const dotsEl = document.getElementById('guide-dots');
-            
-            label.textContent = `Step ${current + 1} of ${steps.length}`;
+        function applyUpdate() {
             card.innerHTML = `
-                <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-2xl mb-4"><img src="/static/icon/${step.icon}.svg" alt="${step.name}" class="w-8 h-8"></div>
-                <h2 class="text-lg font-semibold text-white mb-3">${step.name}</h2>
-                <div class="text-sm text-white/80 leading-relaxed">${step.html}</div>
+                <div style="view-transition-name: carousel-content-guide">
+                    <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-2xl mb-4"><img src="/static/icon/${step.icon}.svg" alt="${step.name}" class="w-8 h-8"></div>
+                    <h2 class="text-lg font-semibold text-white mb-3">${step.name}</h2>
+                    <div class="text-sm text-white/80 leading-relaxed space-y-1">${step.html}</div>
+                </div>
             `;
-            
+            label.textContent = `Step ${current + 1} of ${currentSteps.length}`;
             btnPrev.disabled = current === 0;
-            btnNext.disabled = current === steps.length - 1;
+            btnNext.disabled = current === currentSteps.length - 1;
             
             dotsEl.innerHTML = '';
-            steps.forEach((_, i) => {
-                const dot = document.createElement('div');
+            currentSteps.forEach(function (_, i) {
+                const d = document.createElement('div');
                 if (i === current) {
-                    dot.className = 'w-6 h-2 rounded-full bg-white cursor-pointer';
+                    d.className = 'w-6 h-2 rounded-full bg-white cursor-pointer transition-all duration-200';
                 } else if (i < current) {
-                    dot.className = 'w-2 h-2 rounded-full bg-green-500 cursor-pointer';
+                    d.className = 'w-2 h-2 rounded-full bg-green-500 cursor-pointer transition-all duration-200';
                 } else {
-                    dot.className = 'w-2 h-2 rounded-full border-2 border-white/30 cursor-pointer';
+                    d.className = 'w-2 h-2 rounded-full border-2 border-white/30 cursor-pointer transition-all duration-200';
                 }
-                dot.addEventListener('click', () => { current = i; renderStep(); });
-                dotsEl.appendChild(dot);
+                d.title = currentSteps[i].name;
+                d.addEventListener('click', function () {
+                    if (i === current) return;
+                    const dir = i > current ? 'next' : 'prev';
+                    current = i;
+                    render(true, dir);
+                });
+                dotsEl.appendChild(d);
             });
             
             // Attach button listeners after rendering
@@ -144,22 +240,37 @@
             }
         }
         
-        document.getElementById('guide-prev').addEventListener('click', () => { if (current > 0) { current--; renderStep(); } });
-        document.getElementById('guide-next').addEventListener('click', () => { if (current < steps.length - 1) { current++; renderStep(); } });
-        
-        renderStep();
+        if (useTransition && document.startViewTransition) {
+            document.documentElement.classList.add('carousel-vt');
+            if (direction) {
+                document.documentElement.classList.add(direction === 'next' ? 'vt-dir-next' : 'vt-dir-prev');
+            }
+            const transition = document.startViewTransition(applyUpdate);
+            transition.finished.then(function () {
+                document.documentElement.classList.remove('carousel-vt', 'vt-dir-next', 'vt-dir-prev');
+            });
+        } else {
+            applyUpdate();
+        }
     }
     
     function switchMethod(method) {
         if (method === 'disc') {
-            renderCarousel(discSteps, 1);
+            currentSteps = discSteps;
         } else if (method === 'usb') {
-            renderCarousel(usbSteps, 1);
+            currentSteps = usbSteps;
         }
+        current = 1;
+        render(true, 'next');
     }
     
+    btnPrev.addEventListener('click', function () { if (current > 0) { current--; render(true, 'prev'); } });
+    btnNext.addEventListener('click', function () { if (current < currentSteps.length - 1) { current++; render(true, 'next'); } });
+    
     window.addEventListener('load', () => {
-        renderCarousel(discSteps, 0);
+        currentSteps = discSteps;
+        current = 0;
+        render(false);
     });
 </script>
 

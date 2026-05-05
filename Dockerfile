@@ -16,8 +16,8 @@ COPY templates templates
 COPY routes routes
 COPY utils utils
 
-USER server
 RUN chown -R server:server /home/server
+USER server
 
 ENV FLASK_APP app.py
 EXPOSE 8080

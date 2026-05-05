@@ -1,6 +1,7 @@
 FROM python:alpine
 
-WORKDIR /home/ubuntu
+RUN adduser -D server
+WORKDIR /home/server
 
 # Copy requirements first as to not disturb cache for other changes.
 COPY requirements.txt .
@@ -8,7 +9,7 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt && \
   pip3 install gunicorn
 
-USER ubuntu
+USER server
 
 # Finally, copy the entire source.
 COPY app.py .

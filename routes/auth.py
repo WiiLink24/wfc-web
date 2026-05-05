@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, url_for, request, session
 from utils.utils import generate_gravatar_url
 
 auth_routes_bp = Blueprint("auth_routes", __name__)
@@ -35,12 +35,20 @@ def get_logged_in_user_info():
 
 @auth_routes_bp.route("/login")
 def login():
+    next_url = request.args.get("next") or url_for("pages.index")
+    session["next_url"] = next_url
     if _oidc:
-        return _oidc.oidc_auth("public_routes.index")
-    return redirect(url_for("public_routes.index"))
+        return _oidc.oidc_auth("auth_routes.post_login")
+    return redirect(next_url)
+
+
+@auth_routes_bp.route("/post-login")
+def post_login():
+    next_url = session.pop("next_url", None) or url_for("pages.index")
+    return redirect(next_url)
 
 
 @auth_routes_bp.route("/logout")
 def logout():
     _oidc.oidc_logout()
-    return redirect(url_for("public_routes.index"))
+    return redirect(url_for("pages.index"))

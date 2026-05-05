@@ -11,7 +11,7 @@
 </div>
 
 <div class="max-w-5xl mx-auto my-8 px-4 view-transition z-10 relative" id="game-info">
-    <p class="mb-6 text-lg text-white/60 hidden lg:block"><img src="/static/icon/globe.svg" alt="Globe" class="w-5 h-5 inline-block invert opacity-30"> <a href="/" class="text-white opacity-30 hover:underline">online</a> / {{
+    <p class="mb-6 text-lg text-white/60 hidden lg:block"><img src="/static/icon/globe.svg" alt="Globe" class="w-5 h-5 inline-block invert opacity-30 -translate-y-0.5"> <a href="/" class="text-white opacity-30 hover:underline">online</a> / {{
         game.title_en }}</p>
     <div class="flex flex-col md:flex-row gap-10 items-center">
         <img src="{{ cover.url }}" alt="{{ game.title_en }} Cover" data-fallback="{{ cover.fallback }}"
@@ -40,9 +40,20 @@
                 </span>
             </span>
             {% endif %}
-            <h1 class="text-5xl font-bold text-white mt-3 mb-2"
-                style="view-transition-name: game-title-{{ game.gamespy_id }};">{{ game.title_en }}
-            </h1>
+            <div class="flex items-center gap-4 mt-3 mb-2">
+                <h1 class="text-5xl font-bold text-white"
+                    style="view-transition-name: game-title-{{ game.gamespy_id }};">{{ game.title_en }}
+                </h1>
+                <button id="favorite-btn" class="p-2 rounded-xl hover:bg-gray-800/50 transition duration-200"
+                    data-gamespy-id="{{ game.gamespy_id }}"
+                    data-title="{{ game.title_en }}"
+                    data-cover="{{ cover.url }}"
+                    data-fallback="{{ cover.fallback }}"
+                    data-link="/online/{{ game.gamespy_id }}"
+                    aria-label="Toggle favorite">
+                    <img src="/static/icon/star.svg" alt="Favorite" class="w-8 h-8 transition duration-200" id="favorite-btn-icon">
+                </button>
+            </div>
             <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg"
                 style="view-transition-name: game-release-year-{{game.gamespy_id}};">
                 <span>{{ game.gamespy_id }}</span> •
@@ -77,7 +88,7 @@
                     <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
                         style="filter:brightness(100000%);" />
                     {% if ctrl.required %}<span
-                        class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{%
+                        class="left-1/2 -translate-x-1/2 translate-y-8 text-gray-700 text-[10px] absolute">Required</span>{%
                     endif
                     %}
                 </span>
@@ -264,4 +275,52 @@
         }
     }
 </style>
+<script>
+(function() {
+    var FAV_KEY = 'wfc_favorites';
+    var btn = document.getElementById('favorite-btn');
+    if (!btn) return;
+    var gamespyId = btn.dataset.gamespyId;
+
+    function getFavorites() {
+        try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { return []; }
+    }
+
+    function isFavorited() {
+        return getFavorites().some(function(f) { return f.gamespy_id === gamespyId; });
+    }
+
+    function updateIcon() {
+        var icon = document.getElementById('favorite-btn-icon');
+        if (isFavorited()) {
+            icon.style.filter = 'invert(77%) sepia(67%) saturate(538%) hue-rotate(359deg) brightness(105%) contrast(101%)';
+            icon.style.opacity = '1';
+        } else {
+            icon.style.filter = 'invert(1)';
+            icon.style.opacity = '0.4';
+        }
+    }
+
+    btn.addEventListener('click', function() {
+        var favs = getFavorites();
+        var idx = favs.findIndex(function(f) { return f.gamespy_id === gamespyId; });
+        if (idx >= 0) {
+            favs.splice(idx, 1);
+        } else {
+            favs.push({
+                gamespy_id: gamespyId,
+                title: btn.dataset.title,
+                link: btn.dataset.link,
+                cover: btn.dataset.cover,
+                fallback: btn.dataset.fallback
+            });
+        }
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+        updateIcon();
+        window.dispatchEvent(new StorageEvent('storage', { key: FAV_KEY }));
+    });
+
+    updateIcon();
+})();
+</script>
 {% endblock %}

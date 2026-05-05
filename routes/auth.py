@@ -17,7 +17,7 @@ def get_logged_in_user_info():
         return None
 
     user_data = _oidc.user_getinfo(
-        ["preferred_username", "email", "name", "given_name"]
+        ["preferred_username", "email", "name", "given_name", "groups"]
     )
 
     if not user_data:

@@ -38,7 +38,10 @@ app.register_blueprint(dummy_bp)
 
 @app.context_processor
 def inject_user_info():
-    return {"user_info": get_logged_in_user_info()}
+    return {
+        "user_info": get_logged_in_user_info(),
+        "moderator_group_uuid": getattr(config, "moderator_group_uuid", ""),
+    }
 
 
 def _urlencode_filter(s):

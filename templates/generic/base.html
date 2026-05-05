@@ -226,7 +226,7 @@
                         {{ menu_item('DNS Server', 'pages.dns', 'server') }}
                     </div>
                     <span class="flex flex-col justify-end gap-2">
-                        {% if g.oidc_user.logged_in and '22e7145f-d132-48de-a779-7967208e3dd2' in g.oidc_user.groups %}
+                        {% if g.oidc_user.logged_in and moderator_group_uuid in g.oidc_user.groups %}
                         {{ moderation_menu() }}
                         <hr class="hidden md:block border-gray-800/50 my-1" />
                         {% endif %}

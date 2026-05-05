@@ -1,6 +1,7 @@
-FROM mcr.microsoft.com/python:v1.58.0-noble
+FROM python:alpine
 
-WORKDIR /home/ubuntu
+RUN adduser -D server
+WORKDIR /home/server
 
 # Copy requirements first as to not disturb cache for other changes.
 COPY requirements.txt .
@@ -8,10 +9,15 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt && \
   pip3 install gunicorn
 
-USER ubuntu
+USER server
 
 # Finally, copy the entire source.
-COPY . .
+COPY app.py .
+COPY static static
+COPY templates templates
+COPY routes routes
+COPY utils utils
 
 ENV FLASK_APP app.py
-ENTRYPOINT ["gunicorn", "-b", ":9001", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+EXPOSE 8080
+ENTRYPOINT ["gunicorn", "-b", ":8080", "--access-logfile", "-", "--error-logfile", "-", "app:app"]

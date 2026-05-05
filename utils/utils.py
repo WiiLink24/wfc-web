@@ -7,6 +7,7 @@ WFC_STATS_API = getattr(config, "wfc_stats_api", "")
 WFC_GROUPS_API = getattr(config, "wfc_groups_api", "")
 BAN_INFO_API = getattr(config, "ban_info_api", "")
 
+
 def fetch_ban_info(query):
     try:
         resp = requests.get(BAN_INFO_API.format(query=query), timeout=10)
@@ -15,6 +16,7 @@ def fetch_ban_info(query):
     except Exception as e:
         print(f"Error fetching ban info: {e}")
         return {"error": query, "found": 0, "infolist": []}
+
 
 def get_serial_prefixes(user_info):
     wiis = user_info.get("wiis")
@@ -74,6 +76,7 @@ def fetch_wfc_game_data(gamespy_id):
     result = _run_query(query, [gamespy_id], config.db_url)
     return result[0] if result else None
 
+
 def fetch_patches_for_game(gamespy_id):
     db_url = getattr(config, "wfc_patches_db_url", None)
     if not db_url:
@@ -86,6 +89,7 @@ def fetch_patches_for_game(gamespy_id):
     patch_ids = row.get("patchid", [])
     if isinstance(patch_ids, str):
         import json
+
         try:
             patch_ids = json.loads(patch_ids)
         except Exception:
@@ -96,10 +100,11 @@ def fetch_patches_for_game(gamespy_id):
         "patch_ids": patch_ids,
     }
 
+
 def fetch_featured_wfc_games():
     query = "SELECT * FROM titles WHERE is_featured = true AND is_supported >= 1"
     games = _run_query(query, [], config.db_url)
-    
+
     try:
         resp = requests.get(WFC_STATS_API, timeout=10)
         resp.raise_for_status()
@@ -107,7 +112,7 @@ def fetch_featured_wfc_games():
     except Exception as e:
         print(f"Error fetching WFC stats: {e}")
         stats = {}
-        
+
     for game in games:
         gid = game.get("gamespy_id")
         if gid and gid in stats:
@@ -115,13 +120,15 @@ def fetch_featured_wfc_games():
             game["players_online"] = stat.get("online", 0)
             game["active"] = stat.get("active", 0)
             game["groups"] = stat.get("groups", 0)
-            
+
     return games
+
 
 def fetch_wfc_games():
     query = "SELECT * FROM titles WHERE is_supported >= 1 AND gamespy_id IS NOT NULL"
     games = _run_query(query, [], config.db_url)
     return games
+
 
 def fetch_online_wfc_games(gamespy_id=None):
     try:
@@ -131,12 +138,16 @@ def fetch_online_wfc_games(gamespy_id=None):
     except Exception as e:
         print(f"Error fetching WFC stats: {e}")
         return {}
-    
+
     wfc_compatible_games = fetch_wfc_games()
-    
+
     # Optionally filter by gamespy_id if provided
     if gamespy_id:
-        wfc_compatible_games = [game for game in wfc_compatible_games if game.get("gamespy_id") == gamespy_id]
+        wfc_compatible_games = [
+            game
+            for game in wfc_compatible_games
+            if game.get("gamespy_id") == gamespy_id
+        ]
 
     merged_games = []
     for game in wfc_compatible_games:
@@ -150,6 +161,7 @@ def fetch_online_wfc_games(gamespy_id=None):
             merged_games.append(merged)
 
     return merged_games
+
 
 def find_user_by_wii_number(wii_number, attempt=0):
     base_url = config.authentik_api_url.rstrip("/")
@@ -179,6 +191,7 @@ def generate_gravatar_url(email):
     hash_digest = hashlib.sha256(email.encode()).hexdigest()
     return f"https://www.gravatar.com/avatar/{hash_digest}?d=identicon&s=128"
 
+
 def get_compat_totals():
     query_full = "SELECT COUNT(*) as total FROM titles WHERE is_supported = 2"
     query_partial = "SELECT COUNT(*) as total FROM titles WHERE is_supported = 1"
@@ -186,14 +199,15 @@ def get_compat_totals():
     result_partial = _run_query(query_partial, [], config.db_url)
     return {
         "full": result_full[0]["total"] if result_full else 0,
-        "partial": result_partial[0]["total"] if result_partial else 0
+        "partial": result_partial[0]["total"] if result_partial else 0,
     }
+
 
 def get_groups_for_game(game_name):
     try:
         resp = requests.get(WFC_GROUPS_API, timeout=10)
         resp.raise_for_status()
-        groups = resp.json()        
+        groups = resp.json()
         for g in groups:
             if "created" in g and g["created"]:
                 try:
@@ -203,7 +217,7 @@ def get_groups_for_game(game_name):
                     g["created"] = dt
                 except Exception:
                     pass
-        
+
         return [g for g in groups if g.get("game") == game_name]
     except Exception as e:
         print(f"Error fetching WFC groups: {e}")

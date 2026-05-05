@@ -38,14 +38,14 @@ app.register_blueprint(dummy_bp)
 
 @app.context_processor
 def inject_user_info():
-    return {'user_info': get_logged_in_user_info()}
+    return {"user_info": get_logged_in_user_info()}
 
 
 def _urlencode_filter(s):
     try:
         return quote_plus(s)
     except Exception:
-        return ''
+        return ""
 
 
 def _markdown_filter(s):
@@ -55,8 +55,8 @@ def _markdown_filter(s):
         return s
 
 
-app.jinja_env.filters['urlencode'] = _urlencode_filter
-app.jinja_env.filters['markdown'] = _markdown_filter
+app.jinja_env.filters["urlencode"] = _urlencode_filter
+app.jinja_env.filters["markdown"] = _markdown_filter
 
 # Register blueprints
 app.register_blueprint(auth_routes_bp)
@@ -77,7 +77,8 @@ def handle_404(error):
         ),
         404,
     )
-    
+
+
 @app.errorhandler(401)
 def handle_401(error):
     """Handle 401 Unauthorized errors"""
@@ -108,4 +109,3 @@ def handle_500(error):
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
-

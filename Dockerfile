@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/python:v1.58.0-noble
+FROM python:alpine
 
 WORKDIR /home/ubuntu
 
@@ -11,7 +11,12 @@ RUN pip3 install -r requirements.txt && \
 USER ubuntu
 
 # Finally, copy the entire source.
-COPY . .
+COPY app.py .
+COPY static static
+COPY templates templates
+COPY routes routes
+COPY utils utils
 
 ENV FLASK_APP app.py
-ENTRYPOINT ["gunicorn", "-b", ":9001", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+EXPOSE 8080
+ENTRYPOINT ["gunicorn", "-b", ":8080", "--access-logfile", "-", "--error-logfile", "-", "app:app"]

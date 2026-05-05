@@ -11,7 +11,9 @@
 </div>
 
 <div class="max-w-5xl mx-auto my-8 px-4 view-transition z-10 relative" id="game-info">
-    <p class="mb-6 text-lg text-white/60 hidden lg:block"><img src="/static/icon/globe.svg" alt="Globe" class="w-5 h-5 inline-block invert opacity-30 -translate-y-0.5"> <a href="/" class="text-white opacity-30 hover:underline">online</a> / {{
+    <p class="mb-6 text-lg text-white/60 hidden lg:block"><img src="/static/icon/globe.svg" alt="Globe"
+            class="w-5 h-5 inline-block invert opacity-30 -translate-y-0.5"> <a href="/"
+            class="text-white opacity-30 hover:underline">online</a> / {{
         game.title_en }}</p>
     <div class="flex flex-col md:flex-row gap-10 items-center">
         <img src="{{ cover.url }}" alt="{{ game.title_en }} Cover" data-fallback="{{ cover.fallback }}"
@@ -45,13 +47,11 @@
                     style="view-transition-name: game-title-{{ game.gamespy_id }};">{{ game.title_en }}
                 </h1>
                 <button id="favorite-btn" class="p-2 rounded-xl hover:bg-gray-800/50 transition duration-200"
-                    data-gamespy-id="{{ game.gamespy_id }}"
-                    data-title="{{ game.title_en }}"
-                    data-cover="{{ cover.url }}"
-                    data-fallback="{{ cover.fallback }}"
-                    data-link="/online/{{ game.gamespy_id }}"
-                    aria-label="Toggle favorite">
-                    <img src="/static/icon/star.svg" alt="Favorite" class="w-8 h-8 transition duration-200" id="favorite-btn-icon">
+                    data-gamespy-id="{{ game.gamespy_id }}" data-title="{{ game.title_en }}"
+                    data-cover="{{ cover.url }}" data-fallback="{{ cover.fallback }}"
+                    data-link="/online/{{ game.gamespy_id }}" aria-label="Toggle favorite">
+                    <img src="/static/icon/star.svg" alt="Favorite" class="w-8 h-8 transition duration-200"
+                        id="favorite-btn-icon">
                 </button>
             </div>
             <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg"
@@ -158,7 +158,7 @@
         {% if group.host in group.players %}
         {% set host_player = group.players[group.host] %}
         {% set host_name="<span class='font-regular'><b>" ~
-            host_player.name ~ "</b>'s room</span>" %}
+                host_player.name ~ "</b>'s room</span>" %}
         {% endif %}
         {% endif %}
         <div class="rounded-2xl bg-gray-900/40 p-4">
@@ -190,50 +190,176 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
-{% endif %}
-<button onclick="location.reload()" class="inline-flex items-center gap-3 mt-2 mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition duration-200">
-    <img src="/static/icon/refresh.svg" alt="Refresh" class="w-5 h-5 invert" />
-    Refresh Data
-</button>
-{% endif %}
+    {% endif %}
+    <button onclick="location.reload()"
+        class="inline-flex items-center gap-3 mt-2 mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition duration-200">
+        <img src="/static/icon/refresh.svg" alt="Refresh" class="w-5 h-5 invert" />
+        Refresh Data
+    </button>
+    {% endif %}
 
-{% if game.wfc_observations %}
-<div class="hidden md:block my-3 opacity-30 hover:opacity-100 transition-opacity">
-    {% for obs in game.wfc_observations %}
-    <span class="group relative inline-flex items-center">
-        <img src="/static/icon/{{ obs.icon }}.svg" alt="{{ obs.title }}" class="mr-3 w-5 h-5 invert" />
-        <span class="text-md font-regular text-white">{{ obs.title }}</span>
-        {% if obs.description %}
-        <span class="ml-1 block text-gray-300"> • {{ obs.description }}</span>
+    {% if game.wfc_observations %}
+    <div class="hidden md:block my-3 opacity-30 hover:opacity-100 transition-opacity">
+        {% for obs in game.wfc_observations %}
+        <span class="group relative inline-flex items-center">
+            <img src="/static/icon/{{ obs.icon }}.svg" alt="{{ obs.title }}" class="mr-3 w-5 h-5 invert" />
+            <span class="text-md font-regular text-white">{{ obs.title }}</span>
+            {% if obs.description %}
+            <span class="ml-1 block text-gray-300"> • {{ obs.description }}</span>
+            {% endif %}
+        </span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <p class="uppercase text-gray-400 text-xs mt-10 mb-3">Synopsis</p>
+    {% if game.genre %}
+    <div class="flex flex-row flex-wrap gap-2 mb-4">
+        {% for genre in game.genre.split(',') %}
+        <span
+            class="px-3 py-1 rounded-full bg-gray-900/70 border border-gray-600/60 text-gray-200 text-xs font-semibold uppercase tracking-wide">{{
+            genre.strip() }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <p class="max-h-[150px] text-gray-300 text-lg"
+        style=" mask-image: linear-gradient(to bottom, #fff 80%, transparent 80%); -webkit-mask-image: linear-gradient(to bottom, #fff 0%, transparent 100%);">
+        {{ game.synopsis_en }}</p>
+
+    <span class="w-full flex flex-row items-center justify-between">
+        {% if patches and patches.patch_ids and patches.patch_ids|length > 0 %}
+        <div class="relative mt-6" id="patches-dropdown">
+            <button onclick="togglePatchesDropdown()" type="button"
+                class="inline-flex items-center gap-2 px-4 py-3 bg-gray-900/50 hover:bg-gray-900 text-white rounded-xl transition duration-200">
+                <img src="/static/icon/download.svg" alt="Download" class="w-5 h-5 invert" />
+                Download patches
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="patches-menu"
+                class="hidden absolute bottom-full left-0 mb-2 w-80 bg-gray-950 border border-gray-800 rounded-2xl shadow-xl p-3 z-50">
+                {% if game.game_type == 'DS' %}
+                <div class="text-sm text-gray-300 px-3 py-2">
+                    <img src="/static/icon/triangle-alert.svg" alt="Warning" class="w-4 h-4 inline invert mr-1" />
+                    This game (and all DS games) only requires a change in DNS settings to work. No additional patches
+                    are needed.
+                </div>
+                {% else %}
+                <div class="flex flex-col gap-1">
+                    {% for patch in patches.patch_ids %}
+                    {% set region_char = patch[3] if patch|length > 3 else '' %}
+                    {% if region_char == 'E' %}{% set patch_region = 'NTSC-U' %}{% set patch_emoji = '🇺🇸' %}
+                    {% elif region_char == 'P' %}{% set patch_region = 'PAL' %}{% set patch_emoji = '🇪🇺' %}
+                    {% elif region_char == 'J' %}{% set patch_region = 'NTSC-J' %}{% set patch_emoji = '🇯🇵' %}
+                    {% elif region_char == 'K' %}{% set patch_region = 'NTSC-K' %}{% set patch_emoji = '🇰🇷' %}
+                    {% else %}{% set patch_region = 'Unknown' %}{% set patch_emoji = '🌍' %}
+                    {% endif %}
+                    <div class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-900 transition">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-base">{{ patch_emoji }}</span>
+                            <span class="text-sm text-white truncate">{{ patch[:4] }}{{ patch[5:] }} ({{ patch_region
+                                }})</span>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <button onclick="downloadGCT('{{ patch }}', '/static/patches/{{ patch }}.txt')"
+                                class="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200 hover:bg-gray-700 transition">.gct</button>
+                            <a href="/static/patches/{{ patch }}.txt" download
+                                class="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200 hover:bg-gray-700 transition">.txt</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if game.gamespy_id == 'mariokartwii' %}
+                <hr class="border-gray-800 my-2">
+                <a href="/dns"
+                    class="block w-full text-center px-3 py-2 bg-green-700 hover:bg-green-800 text-white text-sm rounded-xl transition">
+                    DNS Patching Guide
+                </a>
+                {% endif %}
+                <hr class="border-gray-800 my-2">
+                <div class="px-3 py-1 text-xs text-gray-400">
+                    <img src="/static/icon/circle-question-mark.svg" alt="Info" class="w-3 h-3 inline invert mr-1" />
+                    These patches are <u>gecko codes</u><br>
+                    <a href="/guide" class="text-gray-300 hover:text-white hover:underline">How do I install?</a>
+                </div>
+            </div>
+        </div>
+        <script>
+            function togglePatchesDropdown() {
+                var menu = document.getElementById('patches-menu');
+                menu.classList.toggle('hidden');
+            }
+            document.addEventListener('click', function (e) {
+                var dropdown = document.getElementById('patches-dropdown');
+                if (dropdown && !dropdown.contains(e.target)) {
+                    document.getElementById('patches-menu').classList.add('hidden');
+                }
+            });
+
+            function downloadGCT(gameId, fileUrl) {
+                fetch(fileUrl)
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        return response.text();
+                    })
+                    .then(function (code) {
+                        var gctArray = [0x00, 0xd0, 0xc0, 0xde, 0x00, 0xd0, 0xc0, 0xde];
+                        var byteCode = codeToHex(code);
+                        if (!byteCode) return;
+
+                        gctArray = gctArray.concat(byteCode);
+                        gctArray.push(0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+
+                        var byteArray = new Uint8Array(gctArray);
+                        var blob = new Blob([byteArray], { type: "application/octet-stream" });
+                        var url = window.URL.createObjectURL(blob);
+                        var link = document.createElement("a");
+                        link.href = url;
+                        gameId = gameId.slice(0, 4) + gameId.slice(5);
+                        link.download = gameId + ".gct";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    })
+                    .catch(function (error) {
+                        console.error("Error fetching the file:", error);
+                    });
+            }
+
+            function codeToHex(code) {
+                var curatedCode = code.replace(/\s+/g, "");
+                if (
+                    curatedCode.length === 0 ||
+                    !/^[0-9A-Fa-f]*$/.test(curatedCode) ||
+                    curatedCode.length % 16 !== 0
+                ) {
+                    alert("Invalid code format.");
+                    return false;
+                }
+                var byte_array = [];
+                for (var i = 0; i < curatedCode.length; i += 2) {
+                    var byte = parseInt(curatedCode.substring(i, i + 2), 16);
+                    byte_array.push(byte);
+                }
+                return byte_array;
+            }
+        </script>
         {% endif %}
+
+        <a href="https://checkout.wiilink.ca/search?search={{ game.title_en }}&type=title" target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition duration-200">
+            <img src="/static/icon/external-link.svg" alt="Buy" class="w-5 h-5 invert" />
+            View detailed stats on WiiLink Checkout
+        </a>
     </span>
-    {% endfor %}
-</div>
-{% endif %}
-
-<p class="uppercase text-gray-400 text-xs mt-10 mb-3">Synopsis</p>
-{% if game.genre %}
-<div class="flex flex-row flex-wrap gap-2 mb-4">
-    {% for genre in game.genre.split(',') %}
-    <span
-        class="px-3 py-1 rounded-full bg-gray-900/70 border border-gray-600/60 text-gray-200 text-xs font-semibold uppercase tracking-wide">{{
-        genre.strip() }}</span>
-    {% endfor %}
-</div>
-{% endif %}
-<p class="max-h-[150px] text-gray-300 text-lg"
-    style=" mask-image: linear-gradient(to bottom, #fff 80%, transparent 80%); -webkit-mask-image: linear-gradient(to bottom, #fff 0%, transparent 100%);">
-    {{ game.synopsis_en }}</p>
-
-<a href="https://checkout.wiilink.ca/search?search={{ game.title_en }}&type=title" target="_blank"
-    rel="noopener noreferrer"
-    class="inline-flex items-center gap-2 mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition duration-200">
-    <img src="/static/icon/external-link.svg" alt="Buy" class="w-5 h-5 invert" />
-    View detailed stats on WiiLink Checkout
-</a>
 </div>
 
 <style>
@@ -276,51 +402,51 @@
     }
 </style>
 <script>
-(function() {
-    var FAV_KEY = 'wfc_favorites';
-    var btn = document.getElementById('favorite-btn');
-    if (!btn) return;
-    var gamespyId = btn.dataset.gamespyId;
+    (function () {
+        var FAV_KEY = 'wfc_favorites';
+        var btn = document.getElementById('favorite-btn');
+        if (!btn) return;
+        var gamespyId = btn.dataset.gamespyId;
 
-    function getFavorites() {
-        try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { return []; }
-    }
-
-    function isFavorited() {
-        return getFavorites().some(function(f) { return f.gamespy_id === gamespyId; });
-    }
-
-    function updateIcon() {
-        var icon = document.getElementById('favorite-btn-icon');
-        if (isFavorited()) {
-            icon.style.filter = 'invert(77%) sepia(67%) saturate(538%) hue-rotate(359deg) brightness(105%) contrast(101%)';
-            icon.style.opacity = '1';
-        } else {
-            icon.style.filter = 'invert(1)';
-            icon.style.opacity = '0.4';
+        function getFavorites() {
+            try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch (e) { return []; }
         }
-    }
 
-    btn.addEventListener('click', function() {
-        var favs = getFavorites();
-        var idx = favs.findIndex(function(f) { return f.gamespy_id === gamespyId; });
-        if (idx >= 0) {
-            favs.splice(idx, 1);
-        } else {
-            favs.push({
-                gamespy_id: gamespyId,
-                title: btn.dataset.title,
-                link: btn.dataset.link,
-                cover: btn.dataset.cover,
-                fallback: btn.dataset.fallback
-            });
+        function isFavorited() {
+            return getFavorites().some(function (f) { return f.gamespy_id === gamespyId; });
         }
-        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+
+        function updateIcon() {
+            var icon = document.getElementById('favorite-btn-icon');
+            if (isFavorited()) {
+                icon.style.filter = 'invert(77%) sepia(67%) saturate(538%) hue-rotate(359deg) brightness(105%) contrast(101%)';
+                icon.style.opacity = '1';
+            } else {
+                icon.style.filter = 'invert(1)';
+                icon.style.opacity = '0.4';
+            }
+        }
+
+        btn.addEventListener('click', function () {
+            var favs = getFavorites();
+            var idx = favs.findIndex(function (f) { return f.gamespy_id === gamespyId; });
+            if (idx >= 0) {
+                favs.splice(idx, 1);
+            } else {
+                favs.push({
+                    gamespy_id: gamespyId,
+                    title: btn.dataset.title,
+                    link: btn.dataset.link,
+                    cover: btn.dataset.cover,
+                    fallback: btn.dataset.fallback
+                });
+            }
+            localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+            updateIcon();
+            window.dispatchEvent(new StorageEvent('storage', { key: FAV_KEY }));
+        });
+
         updateIcon();
-        window.dispatchEvent(new StorageEvent('storage', { key: FAV_KEY }));
-    });
-
-    updateIcon();
-})();
+    })();
 </script>
 {% endblock %}

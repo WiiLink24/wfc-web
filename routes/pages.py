@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 import requests
-from utils.utils import fetch_ban_info, fetch_wfc_game_data, fetch_ban_info, find_user_by_wii_number, fetch_online_wfc_games, fetch_featured_wfc_games, fetch_wfc_games, get_compat_totals, get_groups_for_game
+from utils.utils import fetch_ban_info, fetch_wfc_game_data, fetch_ban_info, find_user_by_wii_number, fetch_online_wfc_games, fetch_featured_wfc_games, fetch_wfc_games, get_compat_totals, get_groups_for_game, fetch_patches_for_game
 from utils.helpers import is_public_profile, parse_fc, get_online_totals, get_special_template_for_game
 from routes.auth import get_logged_in_user_info
 
@@ -93,11 +93,12 @@ def online_game(gamespy_id):
     stats_list = fetch_online_wfc_games(gamespy_id)
     groups_data = get_groups_for_game(gamespy_id)
     special_template = get_special_template_for_game(gamespy_id)
+    patches = fetch_patches_for_game(gamespy_id)
     if stats_list:
         live_stats = stats_list[0]
     if not game:
         return render_template("errors/error.html", error_code=404, error_title="Game Not Found", error_message="No game found for this ID.", error_details=""), 404
-    return render_template("pages/online-game.html", game=game, live_stats=live_stats, groups_data=groups_data, special_template=special_template)
+    return render_template("pages/online-game.html", game=game, live_stats=live_stats, groups_data=groups_data, special_template=special_template, patches=patches)
 
 @pages_bp.route("/api/online/<gamespy_id>")
 def api_online_game(gamespy_id):

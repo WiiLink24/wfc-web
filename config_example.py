@@ -1,4 +1,5 @@
 db_url = "postgresql://username:password@localhost/nc"
+wfc_patches_db_url = "postgresql://username:password@localhost/wfc_patches"
 
 # Used to secure the web panel.
 secret_key = "please_change_thank_you"

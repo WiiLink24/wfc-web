@@ -1,16 +1,19 @@
 import json
+import os
 
-import psycopg2
 from psycopg2.extras import Json
 import config
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g, session, abort
 from functools import wraps
 
 from routes.auth import get_logged_in_user_info
-
-import config
+from utils.utils import _run_query, _run_query_one, _execute
 
 MODERATOR_GROUP_UUID = getattr(config, "moderator_group_uuid", "")
+
+PATCHES_DB_URL = getattr(config, "wfc_patches_db_url", None)
+PATCHES_STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "patches")
+
 
 def moderator_required(f):
     @wraps(f)
@@ -24,11 +27,39 @@ def moderator_required(f):
         return f(*args, **kwargs)
     return decorated
 
+
 moderation_bp = Blueprint("moderation", __name__, url_prefix="/moderation")
 
 
+def _normalize_observations(observations):
+    if not observations:
+        return []
+    if isinstance(observations, list):
+        return observations
+    if isinstance(observations, str):
+        try:
+            parsed = json.loads(observations)
+            return parsed if isinstance(parsed, list) else []
+        except (ValueError, TypeError):
+            return []
+    return []
+
+
+def _normalize_patch_ids(patch_ids):
+    if not patch_ids:
+        return []
+    if isinstance(patch_ids, list):
+        return patch_ids
+    if isinstance(patch_ids, str):
+        try:
+            parsed = json.loads(patch_ids)
+            return parsed if isinstance(parsed, list) else []
+        except (ValueError, TypeError):
+            return []
+    return []
+
+
 def search_titles(query_text="", limit=100):
-    """Search titles by name or GameSpy ID for moderation."""
     clean_query = (query_text or "").strip()
     params = []
 
@@ -62,86 +93,95 @@ def search_titles(query_text="", limit=100):
     """
     params.append(limit)
 
-    conn = psycopg2.connect(config.db_url)
-    cur = conn.cursor()
+    return _run_query(query, params)
+
+
+def get_patches_for_game(gamespy_id):
+    if not PATCHES_DB_URL:
+        return None
+    row = _run_query_one(
+        "SELECT gamename, patchid, gameid FROM pages WHERE gamespyid = %s",
+        [gamespy_id],
+        PATCHES_DB_URL,
+    )
+    if not row:
+        return None
+    return {
+        "gamename": row["gamename"],
+        "patch_ids": _normalize_patch_ids(row["patchid"]),
+        "gameid": row["gameid"],
+    }
+
+
+def upsert_patches(gamespy_id, gamename, gameid, patch_ids):
+    if not PATCHES_DB_URL:
+        return False
     try:
-        cur.execute(query, params)
-        rows = cur.fetchall()
-        columns = [desc[0] for desc in cur.description]
-        return [dict(zip(columns, row)) for row in rows]
-    finally:
-        cur.close()
-        conn.close()
+        updated = _execute(
+            "UPDATE pages SET gamename = %s, gameid = %s, patchid = %s WHERE gamespyid = %s",
+            [gamename, gameid, Json(patch_ids), gamespy_id],
+            PATCHES_DB_URL,
+        )
+        if updated == 0:
+            _execute(
+                "INSERT INTO pages (gamespyid, gamename, gameid, patchid) VALUES (%s, %s, %s, %s)",
+                [gamespy_id, gamename, gameid, Json(patch_ids)],
+                PATCHES_DB_URL,
+            )
+        return True
+    except Exception:
+        return False
 
 
-def _normalize_observations(observations):
-    """Normalize JSONB observations into a list of dicts."""
-    if not observations:
-        return []
-    if isinstance(observations, list):
-        return observations
-    if isinstance(observations, str):
-        try:
-            parsed = json.loads(observations)
-            return parsed if isinstance(parsed, list) else []
-        except (ValueError, TypeError):
-            return []
-    return []
+def delete_patches_for_game(gamespy_id):
+    if not PATCHES_DB_URL:
+        return False
+    try:
+        _execute("DELETE FROM pages WHERE gamespyid = %s", [gamespy_id], PATCHES_DB_URL)
+        return True
+    except Exception:
+        return False
 
 
 def update_title_support_and_observations(game_id, is_supported, observation=None, new_gamespy_id=None, is_featured=False):
-    conn = psycopg2.connect(config.db_url)
-    cur = conn.cursor()
-    try:
-        if not game_id:
-            return False
-
-        cur.execute(
-            "SELECT wfc_observations FROM titles WHERE game_id = %s",
-            [game_id],
-        )
-        row = cur.fetchone()
-        if not row:
-            return False
-
-        observations = _normalize_observations(row[0])
-        if observation:
-            observations.append(observation)
-
-        if new_gamespy_id:
-            cur.execute(
-                """
-                UPDATE titles
-                SET
-                    gamespy_id = %s,
-                    is_supported = %s,
-                    is_featured = %s,
-                    wfc_observations = %s
-                WHERE game_id = %s
-                """,
-                [new_gamespy_id, is_supported, is_featured, Json(observations), game_id],
-            )
-        else:
-            cur.execute(
-                """
-                UPDATE titles
-                SET
-                    is_supported = %s,
-                    is_featured = %s,
-                    wfc_observations = %s
-                WHERE game_id = %s
-                """,
-                [is_supported, is_featured, Json(observations), game_id],
-            )
-
-        conn.commit()
-        return cur.rowcount > 0
-    except psycopg2.Error:
-        conn.rollback()
+    if not game_id:
         return False
-    finally:
-        cur.close()
-        conn.close()
+
+    row = _run_query_one(
+        "SELECT wfc_observations FROM titles WHERE game_id = %s",
+        [game_id],
+    )
+    if not row:
+        return False
+
+    observations = _normalize_observations(row["wfc_observations"])
+    if observation:
+        observations.append(observation)
+
+    if new_gamespy_id:
+        query = """
+            UPDATE titles
+            SET gamespy_id = %s,
+                is_supported = %s,
+                is_featured = %s,
+                wfc_observations = %s
+            WHERE game_id = %s
+        """
+        params = [new_gamespy_id, is_supported, is_featured, Json(observations), game_id]
+    else:
+        query = """
+            UPDATE titles
+            SET is_supported = %s,
+                is_featured = %s,
+                wfc_observations = %s
+            WHERE game_id = %s
+        """
+        params = [is_supported, is_featured, Json(observations), game_id]
+
+    try:
+        return _execute(query, params) > 0
+    except Exception:
+        return False
 
 
 @moderation_bp.route("/titles", methods=["GET", "POST"])
@@ -221,22 +261,66 @@ def moderation_edit(game_id):
         flash("Please log in to access the moderation panel.")
         return redirect(url_for("auth_routes.login"))
 
-    conn = psycopg2.connect(config.db_url)
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT * FROM titles WHERE game_id = %s", [game_id])
-        row = cur.fetchone()
-        if not row:
-            flash("Title not found.")
-            return redirect(url_for("moderation.titles_panel"))
-        columns = [desc[0] for desc in cur.description]
-        title = dict(zip(columns, row))
-        title["wfc_observations"] = _normalize_observations(title.get("wfc_observations"))
-    finally:
-        cur.close()
-        conn.close()
+    title = _run_query_one("SELECT * FROM titles WHERE game_id = %s", [game_id])
+    if not title:
+        flash("Title not found.")
+        return redirect(url_for("moderation.titles_panel"))
+    title["wfc_observations"] = _normalize_observations(title.get("wfc_observations"))
+
+    patches = get_patches_for_game(title.get("gamespy_id") or "") or {"patch_ids": [], "gameid": "", "gamename": title.get("title_en", "")}
 
     if request.method == "POST":
+        action = request.form.get("patch_action", "").strip()
+        gamespy_id = title.get("gamespy_id", "").strip()
+
+        # Handle patches actions
+        if action == "add_patch":
+            patch_id = (request.form.get("new_patch_id") or "").strip().upper()
+            patch_file = request.files.get("patch_file")
+            if not patch_id:
+                flash("Patch ID is required.")
+                return redirect(url_for("moderation.moderation_edit", game_id=game_id))
+
+            patch_ids = list(patches.get("patch_ids", []))
+            if patch_id not in patch_ids:
+                patch_ids.append(patch_id)
+                patch_ids.sort()
+
+            gameid = (request.form.get("patch_gameid") or patches.get("gameid") or "").strip().upper()
+            gamename = (request.form.get("patch_gamename") or patches.get("gamename") or title.get("title_en", "")).strip()
+
+            if upsert_patches(gamespy_id, gamename, gameid, patch_ids):
+                if patch_file and patch_file.filename:
+                    try:
+                        os.makedirs(PATCHES_STATIC_DIR, exist_ok=True)
+                        filepath = os.path.join(PATCHES_STATIC_DIR, f"{patch_id}.txt")
+                        patch_file.save(filepath)
+                        flash(f"Patch {patch_id} added and file saved.")
+                    except Exception as e:
+                        flash(f"Patch saved to DB but file upload failed: {e}")
+                else:
+                    flash(f"Patch {patch_id} added.")
+            else:
+                flash("Failed to add patch.")
+            return redirect(url_for("moderation.moderation_edit", game_id=game_id))
+
+        elif action == "remove_patch":
+            patch_id = (request.form.get("remove_patch_id") or "").strip().upper()
+            patch_ids = [p for p in patches.get("patch_ids", []) if p != patch_id]
+            gameid = patches.get("gameid", "")
+            gamename = patches.get("gamename", title.get("title_en", ""))
+
+            if not patch_ids:
+                delete_patches_for_game(gamespy_id)
+                flash(f"Patch {patch_id} removed. No patches left, entry deleted.")
+            else:
+                if upsert_patches(gamespy_id, gamename, gameid, patch_ids):
+                    flash(f"Patch {patch_id} removed.")
+                else:
+                    flash("Failed to remove patch.")
+            return redirect(url_for("moderation.moderation_edit", game_id=game_id))
+
+        # Handle title edits
         new_gamespy_id = request.form.get("gamespy_id", "").strip()
         is_supported = int(request.form.get("is_supported", title.get("is_supported", 0)))
         is_featured = '1' in request.form.getlist("is_featured")
@@ -252,10 +336,8 @@ def moderation_edit(game_id):
             else:
                 observations = []
 
-        conn = psycopg2.connect(config.db_url)
-        cur = conn.cursor()
         try:
-            cur.execute(
+            _execute(
                 """
                 UPDATE titles
                 SET gamespy_id = %s,
@@ -266,19 +348,22 @@ def moderation_edit(game_id):
                 """,
                 [new_gamespy_id, is_supported, is_featured, Json(observations), game_id],
             )
-            conn.commit()
             flash("Game updated successfully.")
         except Exception as e:
-            conn.rollback()
             flash(f"Error updating game: {e}")
-        finally:
-            cur.close()
-            conn.close()
         return redirect(url_for("moderation.moderation_edit", game_id=game_id))
+
+    # List existing patch files in static/patches for UI indicators
+    try:
+        existing_patch_files = set(os.listdir(PATCHES_STATIC_DIR)) if os.path.isdir(PATCHES_STATIC_DIR) else set()
+    except Exception:
+        existing_patch_files = set()
 
     user_info = get_logged_in_user_info()
     return render_template(
         "pages/moderation_edit.html",
         user_info=user_info,
         title=title,
+        patches=patches,
+        existing_patch_files=existing_patch_files,
     )

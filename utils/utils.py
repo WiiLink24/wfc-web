@@ -32,7 +32,7 @@ def get_serial_prefixes(user_info):
     return [serial[:12] for serial in serials if serial]
 
 
-def _run_query(query, params, db_url=None):
+def _run_query(query, params=(), db_url=None):
     if db_url is None:
         db_url = config.db_url
     conn = psycopg2.connect(db_url)
@@ -45,10 +45,56 @@ def _run_query(query, params, db_url=None):
     return [dict(zip(columns, row)) for row in rows]
 
 
+def _run_query_one(query, params=(), db_url=None):
+    """Execute a SELECT query and return the first row as a dict, or None."""
+    rows = _run_query(query, params, db_url)
+    return rows[0] if rows else None
+
+
+def _execute(query, params=(), db_url=None):
+    """Execute a write query (INSERT/UPDATE/DELETE) and return rowcount."""
+    if db_url is None:
+        db_url = config.db_url
+    conn = psycopg2.connect(db_url)
+    cur = conn.cursor()
+    try:
+        cur.execute(query, params)
+        conn.commit()
+        return cur.rowcount
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cur.close()
+        conn.close()
+
+
 def fetch_wfc_game_data(gamespy_id):
     query = "SELECT * FROM titles WHERE gamespy_id = %s AND is_supported >= 1"
     result = _run_query(query, [gamespy_id], config.db_url)
     return result[0] if result else None
+
+def fetch_patches_for_game(gamespy_id):
+    db_url = getattr(config, "wfc_patches_db_url", None)
+    if not db_url:
+        return None
+    query = "SELECT patchid, gameid, gamename FROM pages WHERE gamespyid = %s"
+    result = _run_query(query, [gamespy_id], db_url)
+    if not result:
+        return None
+    row = result[0]
+    patch_ids = row.get("patchid", [])
+    if isinstance(patch_ids, str):
+        import json
+        try:
+            patch_ids = json.loads(patch_ids)
+        except Exception:
+            patch_ids = []
+    return {
+        "gamename": row.get("gamename", ""),
+        "gameid": row.get("gameid", ""),
+        "patch_ids": patch_ids,
+    }
 
 def fetch_featured_wfc_games():
     query = "SELECT * FROM titles WHERE is_featured = true AND is_supported >= 1"

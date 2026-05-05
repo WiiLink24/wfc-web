@@ -114,7 +114,7 @@
     </div>
   </div>
 
-  <form method="POST" class="mt-10">
+  <form method="POST" enctype="multipart/form-data" class="mt-10">
 
     <div class="rounded-t-2xl rounded-b-md bg-gray-900/50 border border-gray-800/50 p-6 mb-2">
       <h2 class="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-5">Core Settings</h2>
@@ -159,7 +159,7 @@
       </div>
     </div>
 
-    <div class="rounded-t-md rounded-b-2xl bg-gray-900/50 border border-gray-800/50 p-6 mb-2">
+    <div class="rounded-md bg-gray-900/50 border border-gray-800/50 p-6 mb-2">
       <h2 class="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1">WFC Observation</h2>
       <p class="text-xs text-gray-600 mb-5">A short status note shown alongside the game entry.</p>
 
@@ -223,6 +223,77 @@
         </div>
         {% endif %}
       </div>
+    </div>
+
+    <div class="rounded-t-md rounded-b-2xl bg-gray-900/50 border border-gray-800/50 p-6 mb-2">
+      <h2 class="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1">Patches</h2>
+      <p class="text-xs text-gray-600 mb-5">Gecko code patches for this game.</p>
+
+      {% if patches and patches.patch_ids and patches.patch_ids|length > 0 %}
+      <div class="mb-5">
+        <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">Current Patches</p>
+        <div class="flex flex-col gap-2">
+          {% for patch in patches.patch_ids %}
+          {% set region_char = patch[3] if patch|length > 3 else '' %}
+          {% if region_char == 'E' %}{% set patch_region = 'NTSC-U' %}{% set patch_emoji = '🇺🇸' %}
+          {% elif region_char == 'P' %}{% set patch_region = 'PAL' %}{% set patch_emoji = '🇪🇺' %}
+          {% elif region_char == 'J' %}{% set patch_region = 'NTSC-J' %}{% set patch_emoji = '🇯🇵' %}
+          {% elif region_char == 'K' %}{% set patch_region = 'NTSC-K' %}{% set patch_emoji = '🇰🇷' %}
+          {% else %}{% set patch_region = 'Unknown' %}{% set patch_emoji = '🌍' %}
+          {% endif %}
+          <div class="flex items-center justify-between rounded-lg bg-gray-800 border border-gray-700 px-4 py-2.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-base">{{ patch_emoji }}</span>
+              <span class="text-sm text-white font-mono">{{ patch }}</span>
+              <span class="text-xs text-gray-400">({{ patch_region }})</span>
+              {% if patch + '.txt' in existing_patch_files %}
+              <span class="text-xs text-green-400">file ✓</span>
+              {% else %}
+              <span class="text-xs text-red-400">no file</span>
+              {% endif %}
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <a href="/static/patches/{{ patch }}.txt" target="_blank"
+                class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition">view</a>
+              <button type="submit" name="patch_action" value="remove_patch"
+                class="text-xs px-2 py-1 rounded bg-red-900/40 text-red-400 hover:bg-red-900/60 border border-red-900/50 transition"
+                onclick="document.getElementById('remove-patch-id').value='{{ patch }}';">
+                Remove
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="mb-5 rounded-lg bg-gray-800/50 border border-gray-700/50 px-4 py-6 text-center text-gray-500 text-sm">
+        No patches registered for this game, if you have not set a gamespyid for this game, adding so may show them.
+      </div>
+      {% endif %}
+
+      <hr class="border-gray-800 my-4">
+
+      <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider font-medium">Add New Patch</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+        <div class="md:col-span-1">
+          <label class="block text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wider">Patch ID</label>
+          <input type="text" name="new_patch_id" placeholder="e.g. R4QED01"
+            class="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-white text-sm transition font-mono" />
+        </div>
+        <div class="md:col-span-1">
+          <label class="block text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wider">Patch File (.txt)</label>
+          <input type="file" name="patch_file" accept=".txt"
+            class="block w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-700 file:text-white hover:file:bg-gray-600 file:transition" />
+        </div>
+        <div class="md:col-span-1">
+          <button type="submit" name="patch_action" value="add_patch"
+            class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-green-700 hover:bg-green-600 px-4 py-2.5 text-white text-sm font-medium transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Add Patch
+          </button>
+        </div>
+      </div>
+      <input type="hidden" name="remove_patch_id" id="remove-patch-id" value="" />
     </div>
 
     <div class="flex items-center gap-4 mt-6">

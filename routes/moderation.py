@@ -3,7 +3,17 @@ import os
 
 from psycopg2.extras import Json
 import config
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g, session, abort
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    g,
+    session,
+    abort,
+)
 from functools import wraps
 
 from routes.auth import get_logged_in_user_info
@@ -12,7 +22,9 @@ from utils.utils import _run_query, _run_query_one, _execute
 MODERATOR_GROUP_UUID = getattr(config, "moderator_group_uuid", "")
 
 PATCHES_DB_URL = getattr(config, "wfc_patches_db_url", None)
-PATCHES_STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "patches")
+PATCHES_STATIC_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "static", "patches"
+)
 
 
 def moderator_required(f):
@@ -21,10 +33,11 @@ def moderator_required(f):
         userData = get_logged_in_user_info()
         if not userData:
             abort(401)
-        user_groups = userData['groups']
+        user_groups = userData["groups"]
         if MODERATOR_GROUP_UUID not in user_groups:
             abort(403)
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -143,7 +156,9 @@ def delete_patches_for_game(gamespy_id):
         return False
 
 
-def update_title_support_and_observations(game_id, is_supported, observation=None, new_gamespy_id=None, is_featured=False):
+def update_title_support_and_observations(
+    game_id, is_supported, observation=None, new_gamespy_id=None, is_featured=False
+):
     if not game_id:
         return False
 
@@ -167,7 +182,13 @@ def update_title_support_and_observations(game_id, is_supported, observation=Non
                 wfc_observations = %s
             WHERE game_id = %s
         """
-        params = [new_gamespy_id, is_supported, is_featured, Json(observations), game_id]
+        params = [
+            new_gamespy_id,
+            is_supported,
+            is_featured,
+            Json(observations),
+            game_id,
+        ]
     else:
         query = """
             UPDATE titles
@@ -267,7 +288,11 @@ def moderation_edit(game_id):
         return redirect(url_for("moderation.titles_panel"))
     title["wfc_observations"] = _normalize_observations(title.get("wfc_observations"))
 
-    patches = get_patches_for_game(title.get("gamespy_id") or "") or {"patch_ids": [], "gameid": "", "gamename": title.get("title_en", "")}
+    patches = get_patches_for_game(title.get("gamespy_id") or "") or {
+        "patch_ids": [],
+        "gameid": "",
+        "gamename": title.get("title_en", ""),
+    }
 
     if request.method == "POST":
         action = request.form.get("patch_action", "").strip()
@@ -286,8 +311,16 @@ def moderation_edit(game_id):
                 patch_ids.append(patch_id)
                 patch_ids.sort()
 
-            gameid = (request.form.get("patch_gameid") or patches.get("gameid") or "").strip().upper()
-            gamename = (request.form.get("patch_gamename") or patches.get("gamename") or title.get("title_en", "")).strip()
+            gameid = (
+                (request.form.get("patch_gameid") or patches.get("gameid") or "")
+                .strip()
+                .upper()
+            )
+            gamename = (
+                request.form.get("patch_gamename")
+                or patches.get("gamename")
+                or title.get("title_en", "")
+            ).strip()
 
             if upsert_patches(gamespy_id, gamename, gameid, patch_ids):
                 if patch_file and patch_file.filename:
@@ -322,8 +355,10 @@ def moderation_edit(game_id):
 
         # Handle title edits
         new_gamespy_id = request.form.get("gamespy_id", "").strip()
-        is_supported = int(request.form.get("is_supported", title.get("is_supported", 0)))
-        is_featured = '1' in request.form.getlist("is_featured")
+        is_supported = int(
+            request.form.get("is_supported", title.get("is_supported", 0))
+        )
+        is_featured = "1" in request.form.getlist("is_featured")
 
         if "remove_obs" in request.form:
             observations = []
@@ -332,7 +367,13 @@ def moderation_edit(game_id):
             obs_description = request.form.get("obs_description", "").strip()
             obs_icon = request.form.get("obs_icon", "info").strip() or "info"
             if obs_title and obs_description:
-                observations = [{"title": obs_title, "description": obs_description, "icon": obs_icon}]
+                observations = [
+                    {
+                        "title": obs_title,
+                        "description": obs_description,
+                        "icon": obs_icon,
+                    }
+                ]
             else:
                 observations = []
 
@@ -346,7 +387,13 @@ def moderation_edit(game_id):
                     wfc_observations = %s
                 WHERE game_id = %s
                 """,
-                [new_gamespy_id, is_supported, is_featured, Json(observations), game_id],
+                [
+                    new_gamespy_id,
+                    is_supported,
+                    is_featured,
+                    Json(observations),
+                    game_id,
+                ],
             )
             flash("Game updated successfully.")
         except Exception as e:
@@ -355,7 +402,11 @@ def moderation_edit(game_id):
 
     # List existing patch files in static/patches for UI indicators
     try:
-        existing_patch_files = set(os.listdir(PATCHES_STATIC_DIR)) if os.path.isdir(PATCHES_STATIC_DIR) else set()
+        existing_patch_files = (
+            set(os.listdir(PATCHES_STATIC_DIR))
+            if os.path.isdir(PATCHES_STATIC_DIR)
+            else set()
+        )
     except Exception:
         existing_patch_files = set()
 

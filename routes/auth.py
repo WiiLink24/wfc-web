@@ -15,14 +15,14 @@ def get_logged_in_user_info():
     """Get logged in user info from OIDC and format for templates."""
     if not (_oidc and _oidc.user_loggedin):
         return None
-    
-    user_data = _oidc.user_getinfo([
-        "preferred_username", "email", "name", "given_name"
-    ])
-    
+
+    user_data = _oidc.user_getinfo(
+        ["preferred_username", "email", "name", "given_name"]
+    )
+
     if not user_data:
         return None
-    
+
     # Transform OIDC data to template format
     return {
         "username": user_data.get("preferred_username", ""),

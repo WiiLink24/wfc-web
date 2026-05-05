@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%" viewBox="0 0 1182 448" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+<svg width="100%" height="100%" viewBox="0 0 1182 448" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
     <g transform="matrix(1,0,0,1,-1995,-864)">
         <g>
-            <g transform="matrix(1,-0,-0,1,1995,864)">
-                <use xlink:href="#_Image1" x="1.053" y="0.845" width="656px" height="447px"/>
+            <g transform="matrix(1,0,0,1,1996.05,864.845)">
+                <use id="_Image1_" serif:id="_Image1" xlink:href="#_Image1" x="0" y="0" width="656px" height="447px"/>
             </g>
             <g transform="matrix(1,0,0,1,3718.95,-14928)">
                 <g transform="matrix(1,0,0,1,-2639.8,146.208)">
                     <path d="M2097.2,15791.7C2097.2,15773.2 2082.17,15758.1 2063.63,15758.1L1720.76,15758.1C1702.21,15758.1 1687.18,15773.2 1687.18,15791.7L1687.18,15927.6C1687.18,15946.1 1702.21,15961.2 1720.76,15961.2L2063.63,15961.2C2082.17,15961.2 2097.2,15946.1 2097.2,15927.6L2097.2,15791.7Z" style="fill:rgb(118,118,230);"/>
                 </g>
                 <g transform="matrix(1,0,0,1,-2619.26,165.785)">
-                    <g transform="matrix(144,0,0,144,2033.15,15890.4)">
+                    <g transform="matrix(1,0,0,1,1711.02,15890.4)">
+                        <path d="M29.232,0L55.44,0L71.856,-59.472L88.272,0L114.48,0L142.272,-100.8L118.08,-100.8L100.656,-30.24L81.216,-100.8L62.496,-100.8L43.056,-30.24L25.632,-100.8L1.44,-100.8L29.232,0Z" style="fill:white;"/>
                     </g>
-                    <text x="1711.02px" y="15890.4px" style="font-family:'Gilroy-ExtraBold', 'Gilroy';font-weight:800;font-size:144px;fill:white;">WFC</text>
+                    <g transform="matrix(1,0,0,1,1711.02,15890.4)">
+                        <path d="M213.552,-78.624L213.552,-100.8L152.352,-100.8L152.352,0L175.392,0L175.392,-37.008L212.832,-37.008L212.832,-59.184L175.392,-59.184L175.392,-78.624L213.552,-78.624Z" style="fill:white;"/>
+                    </g>
+                    <g transform="matrix(1,0,0,1,1711.02,15890.4)">
+                        <path d="M275.328,2.016C293.76,2.016 309.888,-7.056 318.528,-21.312L298.656,-32.832C294.336,-25.056 285.552,-20.448 275.328,-20.448C257.472,-20.448 245.952,-32.4 245.952,-50.4C245.952,-68.4 257.472,-80.352 275.328,-80.352C285.552,-80.352 294.192,-75.744 298.656,-67.968L318.528,-79.488C309.744,-93.744 293.616,-102.816 275.328,-102.816C244.944,-102.816 222.912,-80.064 222.912,-50.4C222.912,-20.736 244.944,2.016 275.328,2.016Z" style="fill:white;"/>
+                    </g>
                 </g>
             </g>
         </g>

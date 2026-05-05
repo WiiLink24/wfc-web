@@ -4,29 +4,40 @@
 {% block content %}
 
 {% set lucide_icons = [
-  'check-circle','circle-x','triangle-alert', 'octagon-x', 'shield', 'badge-check', 'octagon-alert', 'clock-alert', 'shield-alert', 'badge-question-mark'
+'check-circle','circle-x','triangle-alert', 'octagon-x', 'shield', 'badge-check', 'octagon-alert', 'clock-alert',
+'shield-alert', 'badge-question-mark'
 ] %}
 
 <style>
   .toggle-track {
-    width: 2.75rem; height: 1.5rem;
+    width: 2.75rem;
+    height: 1.5rem;
     background: #374151;
     border-radius: 9999px;
     position: relative;
     cursor: pointer;
     transition: background 0.2s ease;
   }
-  .toggle-track.active { background: #4f46e5; }
+
+  .toggle-track.active {
+    background: #4f46e5;
+  }
+
   .toggle-thumb {
     position: absolute;
-    top: 3px; left: 3px;
-    width: 1.125rem; height: 1.125rem;
+    top: 3px;
+    left: 3px;
+    width: 1.125rem;
+    height: 1.125rem;
     background: #fff;
     border-radius: 9999px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
   }
-  .toggle-track.active .toggle-thumb { transform: translateX(1.25rem); }
+
+  .toggle-track.active .toggle-thumb {
+    transform: translateX(1.25rem);
+  }
 
   .icon-picker-dropdown {
     display: none;
@@ -45,21 +56,50 @@
     grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: .25rem;
   }
-  .icon-picker-dropdown.open { display: grid; }
+
+  .icon-picker-dropdown.open {
+    display: grid;
+  }
+
   .icon-cell {
-    display: flex; align-items: center; justify-content: center;
-    width: 2.25rem; height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: .5rem;
     cursor: pointer;
     transition: background 0.15s;
   }
-  .icon-cell:hover { background: #1f2937; }
-  .icon-cell.selected { background: #312e81; outline: 2px solid #6366f1; }
 
-  .notice-standard { --nb: #3b82f6; --nbg: rgba(59,130,246,.08); }
-  .notice-warn     { --nb: #f59e0b; --nbg: rgba(245,158,11,.08); }
-  .notice-danger   { --nb: #ef4444; --nbg: rgba(239,68,68,.08); }
-  .notice-question { --nb: #a855f7; --nbg: rgba(168,85,247,.08); }
+  .icon-cell:hover {
+    background: #1f2937;
+  }
+
+  .icon-cell.selected {
+    background: #312e81;
+    outline: 2px solid #6366f1;
+  }
+
+  .notice-standard {
+    --nb: #3b82f6;
+    --nbg: rgba(59, 130, 246, .08);
+  }
+
+  .notice-warn {
+    --nb: #f59e0b;
+    --nbg: rgba(245, 158, 11, .08);
+  }
+
+  .notice-danger {
+    --nb: #ef4444;
+    --nbg: rgba(239, 68, 68, .08);
+  }
+
+  .notice-question {
+    --nb: #a855f7;
+    --nbg: rgba(168, 85, 247, .08);
+  }
 
   .notice-card {
     border: 1px solid var(--nb);
@@ -68,15 +108,26 @@
     padding: 1rem;
   }
 
-  input[type="text"]:focus, select:focus, textarea:focus {
+  input[type="text"]:focus,
+  select:focus,
+  textarea:focus {
     outline: none;
     border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
   }
 
-  .icon-picker-dropdown::-webkit-scrollbar { width: 5px; }
-  .icon-picker-dropdown::-webkit-scrollbar-track { background: transparent; }
-  .icon-picker-dropdown::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+  .icon-picker-dropdown::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .icon-picker-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .icon-picker-dropdown::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 3px;
+  }
 </style>
 
 <div class="max-w-5xl mx-auto my-8 px-4 overflow-scroll">
@@ -89,28 +140,28 @@
     {% set cover_game = title %}
     {% include "components/game_cover_vars.html" %}
     <img src="{{ cover.url }}" alt="{{ title.title_en }} Cover" data-fallback="{{ cover.fallback }}"
-        onerror="if (!this.dataset.tried && this.dataset.fallback) { this.dataset.tried = '1'; this.src = this.dataset.fallback; } else { var placeholder = document.createElement('div'); placeholder.className = 'w-24 h-32 bg-gray-700 rounded-lg flex-shrink-0'; this.parentNode.replaceChild(placeholder, this); }"
-        class="w-[170px] object-cover rounded-lg flex-shrink-0">
+      onerror="if (!this.dataset.tried && this.dataset.fallback) { this.dataset.tried = '1'; this.src = this.dataset.fallback; } else { var placeholder = document.createElement('div'); placeholder.className = 'w-24 h-32 bg-gray-700 rounded-lg flex-shrink-0'; this.parentNode.replaceChild(placeholder, this); }"
+      class="w-[170px] object-cover rounded-lg flex-shrink-0">
     <div class="flex-1 flex flex-col gap-2">
-        <h1 class="text-5xl font-bold text-white mt-3 mb-2">{{ title.title_en }}</h1>
-        <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg">
-            <span>{{ title.game_id }}</span> •
-            {% if title.gamespy_id %}<span>{{ title.gamespy_id }}</span> • {% endif %}
-            {% if title.release_year %}<span>{{ title.release_year }}</span>{% endif %}
-        </div>
-        {% if title.input_controls %}
-        <div class="flex flex-row flex-wrap gap-2 mt-3 mb-2">
-            {% for ctrl in title.input_controls %}
-            <span class="flex items-center gap-1 px-2 py-1">
-                <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
-                    style="filter:brightness(100000%);" />
-                {% if ctrl.required %}<span
-                    class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{%
-                endif %}
-            </span>
-            {% endfor %}
-        </div>
-        {% endif %}
+      <h1 class="text-5xl font-bold text-white mt-3 mb-2">{{ title.title_en }}</h1>
+      <div class="flex flex-row items-center flex-wrap gap-3 text-gray-300 text-lg">
+        <span>{{ title.game_id }}</span> •
+        {% if title.gamespy_id %}<span>{{ title.gamespy_id }}</span> • {% endif %}
+        {% if title.release_year %}<span>{{ title.release_year }}</span>{% endif %}
+      </div>
+      {% if title.input_controls %}
+      <div class="flex flex-row flex-wrap gap-2 mt-3 mb-2">
+        {% for ctrl in title.input_controls %}
+        <span class="flex items-center gap-1 px-2 py-1">
+          <img src="/static/img/controller/{{ ctrl.type }}.svg" alt="{{ ctrl.type }}" class="h-10"
+            style="filter:brightness(100000%);" />
+          {% if ctrl.required %}<span
+            class="-translate-x-1/2 translate-y-8 ml-1 text-gray-700 text-[10px] absolute">Required</span>{%
+          endif %}
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -136,19 +187,23 @@
               <option value="1" {% if title.is_supported==1 %}selected{% endif %}>Partial Support</option>
               <option value="2" {% if title.is_supported==2 %}selected{% endif %}>Fully Supported</option>
             </select>
-            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
         </div>
 
-        <div class="md:col-span-2 flex items-center justify-between rounded-xl bg-gray-800 border border-gray-700 px-4 py-3">
+        <div
+          class="md:col-span-2 flex items-center justify-between rounded-xl bg-gray-800 border border-gray-700 px-4 py-3">
           <div>
             <p class="text-sm font-medium text-white">Featured</p>
             <p class="text-xs text-gray-500 mt-0.5">Pin this title to the featured spotlight on the home page</p>
           </div>
           <div>
             <input type="hidden" name="is_featured" value="0" />
-            <input type="checkbox" name="is_featured" value="1" id="is_featured_cb"
-              {% if title.is_featured %}checked{% endif %} class="sr-only" />
+            <input type="checkbox" name="is_featured" value="1" id="is_featured_cb" {% if title.is_featured %}checked{%
+              endif %} class="sr-only" />
             <div class="toggle-track {% if title.is_featured %}active{% endif %}" id="toggle-featured" role="switch"
               aria-checked="{{ 'true' if title.is_featured else 'false' }}" tabindex="0">
               <div class="toggle-thumb"></div>
@@ -174,22 +229,24 @@
             class="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-3 text-white text-sm hover:border-indigo-600 transition w-32 justify-between"
             onclick="toggleIconPicker()">
             <span class="flex items-center gap-2" id="icon-picker-preview">
-              {% set obs_icon = title.wfc_observations[0].icon if title.wfc_observations and title.wfc_observations[0] else '' %}
+              {% set obs_icon = title.wfc_observations[0].icon if title.wfc_observations and title.wfc_observations[0]
+              else '' %}
               {% if obs_icon %}
-                <img src="/static/icon/{{ obs_icon }}.svg" class="w-4 h-4 invert" />
-                <span class="text-xs truncate max-w-[4rem]">{{ obs_icon }}</span>
+              <img src="/static/icon/{{ obs_icon }}.svg" class="w-4 h-4 invert" />
+              <span class="text-xs truncate max-w-[4rem]">{{ obs_icon }}</span>
               {% else %}
-                <span class="text-gray-500 text-xs">Pick icon</span>
+              <span class="text-gray-500 text-xs">Pick icon</span>
               {% endif %}
             </span>
-            <svg class="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            <svg class="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
 
           <div class="icon-picker-dropdown" id="icon-picker-dropdown">
             {% for icon in lucide_icons %}
-            <div class="icon-cell {% if obs_icon == icon %}selected{% endif %}"
-              data-icon="{{ icon }}" title="{{ icon }}"
-              onclick="selectIcon('{{ icon }}')">
+            <div class="icon-cell {% if obs_icon == icon %}selected{% endif %}" data-icon="{{ icon }}"
+              title="{{ icon }}" onclick="selectIcon('{{ icon }}')">
               <img src="/static/icon/{{ icon }}.svg" alt="{{ icon }}" class="invert" />
             </div>
             {% endfor %}
@@ -217,7 +274,9 @@
           <label class="block text-xs text-gray-500 mb-1.5 opacity-0 select-none">x</label>
           <button type="submit" name="remove_obs" value="1"
             class="px-3 py-2.5 rounded-lg bg-gray-800 border border-red-900 hover:bg-red-950 hover:border-red-700 text-red-400 text-sm transition flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
             Remove
           </button>
         </div>
@@ -253,7 +312,7 @@
               {% endif %}
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-              <a href="/static/patches/{{ patch }}.txt" target="_blank"
+              <a href="/patches/{{ patch }}.txt" target="_blank"
                 class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition">view</a>
               <button type="submit" name="patch_action" value="remove_patch"
                 class="text-xs px-2 py-1 rounded bg-red-900/40 text-red-400 hover:bg-red-900/60 border border-red-900/50 transition"
@@ -281,14 +340,17 @@
             class="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-white text-sm transition font-mono" />
         </div>
         <div class="md:col-span-1">
-          <label class="block text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wider">Patch File (.txt)</label>
+          <label class="block text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wider">Patch File
+            (.txt)</label>
           <input type="file" name="patch_file" accept=".txt"
             class="block w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-700 file:text-white hover:file:bg-gray-600 file:transition" />
         </div>
         <div class="md:col-span-1">
           <button type="submit" name="patch_action" value="add_patch"
             class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-green-700 hover:bg-green-600 px-4 py-2.5 text-white text-sm font-medium transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
             Add Patch
           </button>
         </div>
@@ -299,7 +361,9 @@
     <div class="flex items-center gap-4 mt-6">
       <button type="submit"
         class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 px-6 py-2.5 text-white text-sm font-semibold shadow-lg shadow-indigo-900/30 transition">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
         Save Changes
       </button>
     </div>
@@ -308,31 +372,31 @@
 </div>
 
 <script>
-const toggleEl = document.getElementById('toggle-featured');
-const checkboxEl = document.getElementById('is_featured_cb');
-function updateToggle() {
-  const on = checkboxEl.checked;
-  toggleEl.classList.toggle('active', on);
-  toggleEl.setAttribute('aria-checked', on ? 'true' : 'false');
-}
-toggleEl.addEventListener('click', () => { checkboxEl.checked = !checkboxEl.checked; updateToggle(); });
-toggleEl.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); checkboxEl.checked = !checkboxEl.checked; updateToggle(); } });
-updateToggle();
+  const toggleEl = document.getElementById('toggle-featured');
+  const checkboxEl = document.getElementById('is_featured_cb');
+  function updateToggle() {
+    const on = checkboxEl.checked;
+    toggleEl.classList.toggle('active', on);
+    toggleEl.setAttribute('aria-checked', on ? 'true' : 'false');
+  }
+  toggleEl.addEventListener('click', () => { checkboxEl.checked = !checkboxEl.checked; updateToggle(); });
+  toggleEl.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); checkboxEl.checked = !checkboxEl.checked; updateToggle(); } });
+  updateToggle();
 
-function toggleIconPicker() {
-  document.getElementById('icon-picker-dropdown').classList.toggle('open');
-}
-function selectIcon(name) {
-  document.getElementById('obs_icon_val').value = name;
-  document.getElementById('icon-picker-preview').innerHTML =
-    `<img src="/static/icon/${name}.svg" class="w-4 h-4 invert" /><span class="text-xs truncate max-w-[4rem]">${name}</span>`;
-  document.querySelectorAll('.icon-cell').forEach(c => c.classList.toggle('selected', c.dataset.icon === name));
-  document.getElementById('icon-picker-dropdown').classList.remove('open');
-}
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('icon-picker-wrap');
-  if (!wrap.contains(e.target)) document.getElementById('icon-picker-dropdown').classList.remove('open');
-});
+  function toggleIconPicker() {
+    document.getElementById('icon-picker-dropdown').classList.toggle('open');
+  }
+  function selectIcon(name) {
+    document.getElementById('obs_icon_val').value = name;
+    document.getElementById('icon-picker-preview').innerHTML =
+      `<img src="/static/icon/${name}.svg" class="w-4 h-4 invert" /><span class="text-xs truncate max-w-[4rem]">${name}</span>`;
+    document.querySelectorAll('.icon-cell').forEach(c => c.classList.toggle('selected', c.dataset.icon === name));
+    document.getElementById('icon-picker-dropdown').classList.remove('open');
+  }
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('icon-picker-wrap');
+    if (!wrap.contains(e.target)) document.getElementById('icon-picker-dropdown').classList.remove('open');
+  });
 </script>
 
 {% endblock %}
